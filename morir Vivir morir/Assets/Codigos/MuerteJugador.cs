@@ -11,10 +11,14 @@ public class MuerteJugador : MonoBehaviour
     public GameObject prefabCuerpoMuerto;
     public bool copiarRotacion = true;
 
+    [Header("Cooldown")]
+    public float tiempoCooldownMuerte = 1f;
+
     [Header("Detección de daño")]
     public string tagDaño = "Daño";
 
     private Rigidbody rb;
+    private bool puedeMorir = true;
 
     private void Awake()
     {
@@ -39,8 +43,14 @@ public class MuerteJugador : MonoBehaviour
 
     public void Morir()
     {
+        if (!puedeMorir) return;
+
+        puedeMorir = false;
+
         CrearCuerpoMuerto();
         Reaparecer();
+
+        Invoke(nameof(ReactivarMuerte), tiempoCooldownMuerte);
     }
 
     private void CrearCuerpoMuerto()
@@ -49,11 +59,18 @@ public class MuerteJugador : MonoBehaviour
 
         Quaternion rotacion = copiarRotacion ? transform.rotation : Quaternion.identity;
 
-        Instantiate(
+        GameObject cuerpo = Instantiate(
             prefabCuerpoMuerto,
             transform.position,
             rotacion
         );
+
+        CuerpoMuerto cuerpoMuerto = cuerpo.GetComponent<CuerpoMuerto>();
+
+        if (cuerpoMuerto != null)
+        {
+            cuerpoMuerto.ActivarMuerte();
+        }
     }
 
     private void Reaparecer()
@@ -68,5 +85,10 @@ public class MuerteJugador : MonoBehaviour
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+    }
+
+    private void ReactivarMuerte()
+    {
+        puedeMorir = true;
     }
 }
