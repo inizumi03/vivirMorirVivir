@@ -4,12 +4,14 @@ using UnityEngine;
 
 public class lanzarFabrica : MonoBehaviour
 {
-   [Header("Puntos")]
+    [Header("Puntos")]
     public Transform lugarDeCarga;
 
     [Header("Lanzamiento")]
     public Transform direccionLanzamiento;
-    public float fuerzaLanzamiento = 12f;
+    public float fuerzaMinima = 6f;
+    public float fuerzaMaxima = 18f;
+    public float tiempoCargaMaxima = 1.5f;
     public float fuerzaArriba = 2f;
 
     [Header("Trayectoria")]
@@ -21,12 +23,13 @@ public class lanzarFabrica : MonoBehaviour
     private GameObject objetoAgarrado;
     private Rigidbody rbObjeto;
 
+    private bool cargandoLanzamiento;
+    private float tiempoCargando;
+
     private void Start()
     {
         if (lineaTrayectoria != null)
-        {
             lineaTrayectoria.enabled = false;
-        }
     }
 
     private void Update()
@@ -34,14 +37,29 @@ public class lanzarFabrica : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
         {
             if (objetoAgarrado == null)
-            {
                 Agarrar();
-            }
+            else
+                Soltar();
         }
 
-        if (Input.GetMouseButtonDown(0) && objetoAgarrado != null)
+        if (objetoAgarrado != null)
         {
-            Lanzar();
+            if (Input.GetMouseButtonDown(0))
+            {
+                cargandoLanzamiento = true;
+                tiempoCargando = 0f;
+            }
+
+            if (Input.GetMouseButton(0) && cargandoLanzamiento)
+            {
+                tiempoCargando += Time.deltaTime;
+                tiempoCargando = Mathf.Clamp(tiempoCargando, 0f, tiempoCargaMaxima);
+            }
+
+            if (Input.GetMouseButtonUp(0) && cargandoLanzamiento)
+            {
+                Lanzar();
+            }
         }
 
         ActualizarTrayectoria();
@@ -75,6 +93,9 @@ public class lanzarFabrica : MonoBehaviour
             respawn.ActivarFisicas();
         }
 
+        cargandoLanzamiento = false;
+        tiempoCargando = 0f;
+
         rbObjeto.velocity = Vector3.zero;
         rbObjeto.angularVelocity = Vector3.zero;
         rbObjeto.useGravity = false;
@@ -82,6 +103,25 @@ public class lanzarFabrica : MonoBehaviour
 
         objetoAgarrado.transform.position = lugarDeCarga.position;
         objetoAgarrado.transform.rotation = lugarDeCarga.rotation;
+    }
+
+    private void Soltar()
+    {
+        if (objetoAgarrado == null) return;
+
+        rbObjeto.useGravity = true;
+        rbObjeto.freezeRotation = false;
+        rbObjeto.velocity = Vector3.zero;
+        rbObjeto.angularVelocity = Vector3.zero;
+
+        objetoAgarrado = null;
+        rbObjeto = null;
+
+        cargandoLanzamiento = false;
+        tiempoCargando = 0f;
+
+        if (lineaTrayectoria != null)
+            lineaTrayectoria.enabled = false;
     }
 
     private void Lanzar()
@@ -97,13 +137,15 @@ public class lanzarFabrica : MonoBehaviour
         rb.angularVelocity = Vector3.zero;
 
         Vector3 direccion = ObtenerDireccionLanzamiento();
+        float fuerzaActual = ObtenerFuerzaActual();
 
-        rb.AddForce(direccion * fuerzaLanzamiento, ForceMode.Impulse);
+        rb.AddForce(direccion * fuerzaActual, ForceMode.Impulse);
+
+        cargandoLanzamiento = false;
+        tiempoCargando = 0f;
 
         if (lineaTrayectoria != null)
-        {
             lineaTrayectoria.enabled = false;
-        }
     }
 
     private Vector3 ObtenerDireccionLanzamiento()
@@ -115,6 +157,12 @@ public class lanzarFabrica : MonoBehaviour
         direccion = (direccion + Vector3.up * fuerzaArriba).normalized;
 
         return direccion;
+    }
+
+    private float ObtenerFuerzaActual()
+    {
+        float porcentajeCarga = tiempoCargando / tiempoCargaMaxima;
+        return Mathf.Lerp(fuerzaMinima, fuerzaMaxima, porcentajeCarga);
     }
 
     private void ActualizarTrayectoria()
@@ -131,7 +179,7 @@ public class lanzarFabrica : MonoBehaviour
         lineaTrayectoria.positionCount = puntosLinea;
 
         Vector3 origen = lugarDeCarga.position;
-        Vector3 velocidadInicial = ObtenerDireccionLanzamiento() * fuerzaLanzamiento;
+        Vector3 velocidadInicial = ObtenerDireccionLanzamiento() * ObtenerFuerzaActual();
 
         for (int i = 0; i < puntosLinea; i++)
         {
