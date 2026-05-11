@@ -13,14 +13,7 @@ public class Vida : MonoBehaviour
     [Header("Fabrica")]
     public Fabrica fabrica;
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag(tagDaño))
-        {
-            Morir();
-        }
-    }
-
+    // SOLO COLISIONES REALES
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.CompareTag(tagDaño))
@@ -40,10 +33,6 @@ public class Vida : MonoBehaviour
         if (fabrica != null)
         {
             fabrica.RespawnearJugador(gameObject);
-        }
-        else
-        {
-            Debug.Log("FABRICA ES NULL");
         }
 
         Invoke(nameof(ResetearMuerte), 0.2f);
