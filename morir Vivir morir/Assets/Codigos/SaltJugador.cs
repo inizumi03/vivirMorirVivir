@@ -9,6 +9,7 @@ public class SaltJugador : MonoBehaviour
     public int cantidadSaltosMax = 2;
 
     [Header("Suelo")]
+    public Transform puntoSuelo;
     public float distanciaSuelo = 0.3f;
     public LayerMask capaSuelo;
 
@@ -16,13 +17,18 @@ public class SaltJugador : MonoBehaviour
     public AnimJugador animJugador;
 
     private Rigidbody rb;
-
     private int saltosRestantes;
     private bool enSuelo;
+    private bool esperandoEventoSalto;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+    }
+
+    private void Start()
+    {
+        saltosRestantes = cantidadSaltosMax;
     }
 
     private void Update()
@@ -31,31 +37,69 @@ public class SaltJugador : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            IntentarSaltar();
+            PedirSalto();
         }
     }
 
-    void IntentarSaltar()
+    private void PedirSalto()
     {
-        if (saltosRestantes <= 0) return;
+        if (saltosRestantes <= 0)
+        {
+            Debug.Log("NO HAY SALTOS");
+            return;
+        }
 
-        saltosRestantes--;
+        if (esperandoEventoSalto)
+        {
+            Debug.Log("ESPERANDO EVENTO");
+            return;
+        }
 
-        // Reinicia la velocidad vertical para que el salto sea consistente
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        esperandoEventoSalto = true;
 
-        rb.AddForce(Vector3.up * fuerzaSalto, ForceMode.Impulse);
+        Debug.Log("ACTIVANDO ANIMACION DE SALTO");
 
         if (animJugador != null)
         {
             animJugador.ActivarSalto();
         }
+        else
+        {
+            Debug.Log("AnimJugador es NULL");
+        }
     }
 
-    void VerificarSuelo()
+    public void EventoSaltar()
     {
+        Debug.Log("SALTO REAL");
+
+        if (!esperandoEventoSalto)
+        {
+            Debug.Log("NO ESTABA ESPERANDO EVENTO");
+            return;
+        }
+
+        if (saltosRestantes <= 0)
+        {
+            Debug.Log("SIN SALTOS RESTANTES");
+            return;
+        }
+
+        esperandoEventoSalto = false;
+        saltosRestantes--;
+
+        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
+        rb.AddForce(Vector3.up * fuerzaSalto, ForceMode.Impulse);
+
+        Debug.Log("FUERZA APLICADA");
+    }
+
+    private void VerificarSuelo()
+    {
+        Vector3 origen = puntoSuelo != null ? puntoSuelo.position : transform.position;
+
         enSuelo = Physics.Raycast(
-            transform.position,
+            origen,
             Vector3.down,
             distanciaSuelo,
             capaSuelo

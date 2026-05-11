@@ -6,25 +6,30 @@ public class AnimJugador : MonoBehaviour
 {
     [Header("Referencias")]
     public Animator animator;
-    public Rigidbody rb;
+    public Rigidbody rbJugador;
 
     [Header("Suelo")]
+    public Transform puntoSuelo;
     public float distanciaSuelo = 0.3f;
     public LayerMask capaSuelo;
+
+    [Header("Movimiento")]
+    public float velocidadMinima = 0.1f;
 
     private bool enSuelo;
 
     private void Update()
     {
-        VerificarSuelo();
-        ManejarMovimiento();
-        ManejarSalto();
+        RevisarSuelo();
+        ActualizarMovimiento();
     }
 
-    void VerificarSuelo()
+    private void RevisarSuelo()
     {
+        Vector3 origen = puntoSuelo != null ? puntoSuelo.position : transform.position;
+
         enSuelo = Physics.Raycast(
-            transform.position,
+            origen,
             Vector3.down,
             distanciaSuelo,
             capaSuelo
@@ -33,40 +38,26 @@ public class AnimJugador : MonoBehaviour
         animator.SetBool("enSuelo", enSuelo);
     }
 
-    void ManejarMovimiento()
+    private void ActualizarMovimiento()
     {
-        Vector3 velocidadHorizontal = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-        float velocidad = velocidadHorizontal.magnitude;
+        if (rbJugador == null) return;
 
-        animator.SetFloat("velocidad", velocidad);
+        Vector3 velocidadHorizontal = new Vector3(
+            rbJugador.velocity.x,
+            0f,
+            rbJugador.velocity.z
+        );
+
+        animator.SetFloat("velocidad", velocidadHorizontal.magnitude);
     }
 
-    void ManejarSalto()
-    {
-        float velocidadY = rb.velocity.y;
-
-        // Detecta inicio de salto
-        if (!enSuelo && velocidadY > 0.1f)
-        {
-            animator.SetBool("caida", false);
-        }
-
-        // Detecta caída
-        if (!enSuelo && velocidadY < -0.1f)
-        {
-            animator.SetBool("caida", true);
-        }
-
-        // Reset cuando toca suelo
-        if (enSuelo)
-        {
-            animator.SetBool("caida", false);
-        }
-    }
-
-    // Esto lo llamás desde tu código de salto
     public void ActivarSalto()
     {
         animator.SetTrigger("salto");
+    }
+
+    public void ActivarAgarre()
+    {
+        animator.SetTrigger("agarrar");
     }
 }
