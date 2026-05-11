@@ -13,7 +13,9 @@ public class Vida : MonoBehaviour
     [Header("Fabrica")]
     public Fabrica fabrica;
 
-    // SOLO COLISIONES REALES
+    [Header("Pantalla negra")]
+    public MuerteTrucha pantallaNegra;
+
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.CompareTag(tagDaño))
@@ -28,14 +30,21 @@ public class Vida : MonoBehaviour
 
         muerto = true;
 
-        Debug.Log("JUGADOR MUERTO");
-
-        if (fabrica != null)
+        if (fabrica != null && pantallaNegra != null)
+        {
+            StartCoroutine(
+                pantallaNegra.FadeRespawn(() =>
+                {
+                    fabrica.RespawnearJugador(gameObject);
+                })
+            );
+        }
+        else if (fabrica != null)
         {
             fabrica.RespawnearJugador(gameObject);
         }
 
-        Invoke(nameof(ResetearMuerte), 0.2f);
+        Invoke(nameof(ResetearMuerte), 0.5f);
     }
 
     private void ResetearMuerte()

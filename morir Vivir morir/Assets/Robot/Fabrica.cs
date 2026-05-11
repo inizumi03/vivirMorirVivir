@@ -4,26 +4,89 @@ using UnityEngine;
 
 public class Fabrica : MonoBehaviour
 {
-    [Header("Respawn")]
-    public Transform puntoRespawn;
+    [Header("Respawn normal")]
+    public Transform puntoRespawnJugador;
 
-    [Header("Prefab cuerpo")]
+    [Header("Respawn si muero cargando fábrica")]
+    public Transform puntoControlActual;
+
+    [Header("Prefab cuerpo muerto")]
     public GameObject cuerpoMuertoPrefab;
+
+    [Header("Daño")]
+    public string tagDaño = "Daño";
+
+    private Vector3 ultimaPosicionSegura;
+    private Quaternion ultimaRotacionSegura;
+
+    private bool siendoCargada = false;
+    private Rigidbody rb;
+
+    private void Awake()
+    {
+        rb = GetComponent<Rigidbody>();
+        GuardarPosicionSegura();
+    }
+
+    public void GuardarPosicionSegura()
+    {
+        ultimaPosicionSegura = transform.position;
+        ultimaRotacionSegura = transform.rotation;
+    }
+
+    public void MarcarCargada(bool estado)
+    {
+        siendoCargada = estado;
+    }
+
+    public void ActualizarPuntoControl(Transform nuevoPunto)
+    {
+        puntoControlActual = nuevoPunto;
+    }
 
     public void RespawnearJugador(GameObject jugador)
     {
         CrearCuerpo(jugador);
 
-        Rigidbody rb = jugador.GetComponent<Rigidbody>();
+        Rigidbody rbJugador = jugador.GetComponent<Rigidbody>();
 
-        if (rb != null)
+        if (rbJugador != null)
         {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            rbJugador.velocity = Vector3.zero;
+            rbJugador.angularVelocity = Vector3.zero;
         }
 
-        jugador.transform.position = puntoRespawn.position;
-        jugador.transform.rotation = puntoRespawn.rotation;
+        if (siendoCargada)
+        {
+            Transform puntoFinal = puntoControlActual != null ? puntoControlActual : null;
+
+            if (puntoFinal != null)
+            {
+                MoverFabrica(puntoFinal.position, puntoFinal.rotation);
+                jugador.transform.position = puntoFinal.position;
+                jugador.transform.rotation = puntoFinal.rotation;
+            }
+            else
+            {
+                MoverFabrica(ultimaPosicionSegura, ultimaRotacionSegura);
+                jugador.transform.position = ultimaPosicionSegura;
+                jugador.transform.rotation = ultimaRotacionSegura;
+            }
+
+            siendoCargada = false;
+            return;
+        }
+
+        if (puntoRespawnJugador != null)
+        {
+            jugador.transform.position = puntoRespawnJugador.position;
+            jugador.transform.rotation = puntoRespawnJugador.rotation;
+        }
+        else
+        {
+            jugador.transform.position = transform.position;
+            jugador.transform.rotation = transform.rotation;
+        }
     }
 
     private void CrearCuerpo(GameObject jugador)
@@ -37,18 +100,36 @@ public class Fabrica : MonoBehaviour
         );
 
         Animator anim = cuerpo.GetComponent<Animator>();
-
         if (anim != null)
-        {
             anim.enabled = false;
-        }
+    }
 
-        Rigidbody[] rigidbodies = cuerpo.GetComponentsInChildren<Rigidbody>();
-
-        foreach (Rigidbody rb in rigidbodies)
+    private void MoverFabrica(Vector3 posicion, Quaternion rotacion)
+    {
+        if (rb != null)
         {
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
+
+        transform.position = posicion;
+        transform.rotation = rotacion;
+    }
+
+    public void VolverAPosicionSegura()
+    {
+        MoverFabrica(ultimaPosicionSegura, ultimaRotacionSegura);
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.CompareTag(tagDaño))
+            VolverAPosicionSegura();
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag(tagDaño))
+            VolverAPosicionSegura();
     }
 }

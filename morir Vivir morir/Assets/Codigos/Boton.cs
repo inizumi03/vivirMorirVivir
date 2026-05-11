@@ -6,50 +6,35 @@ public class Boton : MonoBehaviour
 {
     [Header("Detección")]
     public string tagJugador = "Player";
-    public string tagObjeto = "Aparecer";
+    public string tagObjeto = "Agarrable";
 
-    [Header("Objeto que baja")]
-    public Transform objetoABajar;
-    public float distanciaBajada = 5f;
-    public float velocidad = 2f;
+    [Header("Controlador")]
+    public PuertaPorBotones puerta;
 
-    private Vector3 posicionInicial;
-    private Vector3 posicionFinal;
+    [Header("Estado")]
+    public bool usarSoloUnaVez = true;
 
     private bool activado = false;
 
-    private void Start()
-    {
-        if (objetoABajar != null)
-        {
-            posicionInicial = objetoABajar.position;
-            posicionFinal = posicionInicial + Vector3.down * distanciaBajada;
-        }
-    }
-
-    private void Update()
-    {
-        if (objetoABajar == null) return;
-
-        Vector3 destino = activado ? posicionFinal : posicionInicial;
-
-        objetoABajar.position = Vector3.MoveTowards(
-            objetoABajar.position,
-            destino,
-            velocidad * Time.deltaTime
-        );
-    }
-
     private void OnTriggerEnter(Collider other)
     {
-        if (PuedeActivar(other))
+        if (!PuedeActivar(other.gameObject)) return;
+
+        // SI YA SE ACTIVÓ Y ES DE UN SOLO USO
+        if (activado && usarSoloUnaVez) return;
+
+        activado = true;
+
+        if (puerta != null)
         {
-            activado = !activado;
+            puerta.SumarBoton();
         }
+
+        Debug.Log("BOTON ACTIVADO");
     }
 
-    private bool PuedeActivar(Collider other)
+    private bool PuedeActivar(GameObject obj)
     {
-        return other.CompareTag(tagJugador) || other.CompareTag(tagObjeto);
+        return obj.CompareTag(tagJugador) || obj.CompareTag(tagObjeto);
     }
 }

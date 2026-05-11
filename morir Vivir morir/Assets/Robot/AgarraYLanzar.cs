@@ -176,6 +176,21 @@ public class AgarraYLanzar : MonoBehaviour
 
         objetoAgarrado = rbObjeto.gameObject;
 
+        Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
+
+        if (fabrica == null)
+            fabrica = objetoAgarrado.GetComponentInParent<Fabrica>();
+
+        if (fabrica == null)
+            fabrica = objetoAgarrado.GetComponentInChildren<Fabrica>();
+
+        if (fabrica != null)
+        {
+            fabrica.GuardarPosicionSegura();
+            fabrica.MarcarCargada(true);
+
+            Debug.Log("FABRICA AGARRADA");
+        }
         ObjetoEstable datos = objetoAgarrado.GetComponent<ObjetoEstable>();
 
         if (datos != null)
@@ -224,7 +239,20 @@ public class AgarraYLanzar : MonoBehaviour
         rbObjeto.freezeRotation = false;
         rbObjeto.velocity = Vector3.zero;
         rbObjeto.angularVelocity = Vector3.zero;
+        Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
 
+        if (fabrica == null)
+            fabrica = objetoAgarrado.GetComponentInParent<Fabrica>();
+
+        if (fabrica == null)
+            fabrica = objetoAgarrado.GetComponentInChildren<Fabrica>();
+
+        if (fabrica != null)
+        {
+            fabrica.MarcarCargada(false);
+
+            Debug.Log("FABRICA SOLTADA");
+        }
         objetoAgarrado = null;
         rbObjeto = null;
 
@@ -246,7 +274,20 @@ public class AgarraYLanzar : MonoBehaviour
 
         if (datos != null)
             datos.IgnorarColisionConJugador(collidersJugador, false);
+        Fabrica fabrica = objeto.GetComponent<Fabrica>();
 
+        if (fabrica == null)
+            fabrica = objeto.GetComponentInParent<Fabrica>();
+
+        if (fabrica == null)
+            fabrica = objeto.GetComponentInChildren<Fabrica>();
+
+        if (fabrica != null)
+        {
+            fabrica.MarcarCargada(false);
+
+            Debug.Log("FABRICA LANZADA");
+        }
         objetoAgarrado = null;
         rbObjeto = null;
 
