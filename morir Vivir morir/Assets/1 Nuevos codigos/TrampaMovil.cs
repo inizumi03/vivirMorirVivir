@@ -13,35 +13,33 @@ public class TrampaMovil : MonoBehaviour
     public bool esperarEnPuntos = true;
     public float tiempoEspera = 1f;
 
-    [Header("Animación de la sierra")]
+    [Header("Animación")]
     public Animator animatorSierra;
 
     private Transform objetivoActual;
     private bool esperando = false;
-    private bool bloqueadaPorCadaver = false;
-
-    private int cantidadCadaveresTocando = 0;
+    private int cadaveresTocando = 0;
 
     private void Start()
     {
         if (puntoA != null)
-        {
             transform.position = puntoA.position;
-        }
 
         objetivoActual = puntoB;
 
-        if (animatorSierra != null)
-        {
-            animatorSierra.speed = 1f;
-        }
+        ActualizarEstadoSierra();
     }
 
     private void Update()
     {
+        if (cadaveresTocando < 0)
+            cadaveresTocando = 0;
+
+        ActualizarEstadoSierra();
+
         if (puntoA == null || puntoB == null) return;
         if (esperando) return;
-        if (bloqueadaPorCadaver) return;
+        if (cadaveresTocando > 0) return;
 
         transform.position = Vector3.MoveTowards(
             transform.position,
@@ -55,31 +53,12 @@ public class TrampaMovil : MonoBehaviour
         }
     }
 
-    private void CambiarObjetivo()
-    {
-        objetivoActual = objetivoActual == puntoA ? puntoB : puntoA;
-
-        if (esperarEnPuntos)
-        {
-            StartCoroutine(Esperar());
-        }
-    }
-
-    private IEnumerator Esperar()
-    {
-        esperando = true;
-
-        yield return new WaitForSeconds(tiempoEspera);
-
-        esperando = false;
-    }
-
     private void OnCollisionEnter(Collision collision)
     {
         if (EsCadaver(collision.collider))
         {
-            cantidadCadaveresTocando++;
-            BloquearSierra();
+            cadaveresTocando++;
+            ActualizarEstadoSierra();
         }
     }
 
@@ -87,15 +66,11 @@ public class TrampaMovil : MonoBehaviour
     {
         if (EsCadaver(collision.collider))
         {
-            cantidadCadaveresTocando--;
+            cadaveresTocando--;
+            if (cadaveresTocando < 0)
+                cadaveresTocando = 0;
 
-            if (cantidadCadaveresTocando < 0)
-                cantidadCadaveresTocando = 0;
-
-            if (cantidadCadaveresTocando == 0)
-            {
-                DesbloquearSierra();
-            }
+            ActualizarEstadoSierra();
         }
     }
 
@@ -104,28 +79,27 @@ public class TrampaMovil : MonoBehaviour
         return col.GetComponentInParent<CadaverBloqueador>() != null;
     }
 
-    private void BloquearSierra()
+    private void ActualizarEstadoSierra()
     {
-        bloqueadaPorCadaver = true;
+        bool bloqueada = cadaveresTocando > 0;
 
         if (animatorSierra != null)
-        {
-            animatorSierra.speed = 0f;
-        }
-
-        Debug.Log("SIERRA BLOQUEADA POR CADAVER");
+            animatorSierra.speed = bloqueada ? 0f : 1f;
     }
 
-    private void DesbloquearSierra()
+    private void CambiarObjetivo()
     {
-        bloqueadaPorCadaver = false;
+        objetivoActual = objetivoActual == puntoA ? puntoB : puntoA;
 
-        if (animatorSierra != null)
-        {
-            animatorSierra.speed = 1f;
-        }
+        if (esperarEnPuntos)
+            StartCoroutine(Esperar());
+    }
 
-        Debug.Log("SIERRA LIBERADA");
+    private IEnumerator Esperar()
+    {
+        esperando = true;
+        yield return new WaitForSeconds(tiempoEspera);
+        esperando = false;
     }
 
     private void OnDrawGizmos()

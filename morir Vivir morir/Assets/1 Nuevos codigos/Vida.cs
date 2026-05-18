@@ -16,7 +16,7 @@ public class Vida : MonoBehaviour
     [Header("Pantalla negra")]
     public MuerteTrucha pantallaNegra;
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnCollisionStay(Collision collision)
     {
         if (collision.collider.CompareTag(tagDaño))
         {
