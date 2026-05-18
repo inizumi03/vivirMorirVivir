@@ -10,7 +10,6 @@ public class CamaraJugador : MonoBehaviour
     [Header("Rotación Mouse")]
     public float sensibilidadX = 200f;
     public float sensibilidadY = 150f;
-
     public float minY = -30f;
     public float maxY = 60f;
 
@@ -21,46 +20,41 @@ public class CamaraJugador : MonoBehaviour
     public float distancia = 6f;
     public float altura = 2f;
     public float suavizado = 10f;
+    public float distanciaMinima = 0.8f;
 
     [Header("Colisión")]
     public bool evitarParedes = true;
     public LayerMask capasColision;
-    public float radioCamara = 0.3f;
-
-    private float distanciaActual;
+    public float radioCamara = 0.35f;
+    public float margenPared = 0.25f;
 
     private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
-
-        distanciaActual = distancia;
     }
 
     private void LateUpdate()
     {
         if (objetivo == null) return;
 
-        // Mouse input
         float mouseX = Input.GetAxis("Mouse X") * sensibilidadX * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * sensibilidadY * Time.deltaTime;
 
         rotacionX += mouseX;
         rotacionY -= mouseY;
-
         rotacionY = Mathf.Clamp(rotacionY, minY, maxY);
 
         Quaternion rotacion = Quaternion.Euler(rotacionY, rotacionX, 0f);
 
         Vector3 puntoObjetivo = objetivo.position + Vector3.up * altura;
+        Vector3 direccion = rotacion * Vector3.back;
 
-        Vector3 direccion = rotacion * new Vector3(0, 0, -distancia);
-
-        Vector3 posicionDeseada = puntoObjetivo + direccion;
+        Vector3 posicionDeseada = puntoObjetivo + direccion * distancia;
 
         if (evitarParedes)
         {
-            posicionDeseada = AjustarPorColision(puntoObjetivo, posicionDeseada);
+            posicionDeseada = AjustarPorColision(puntoObjetivo, direccion);
         }
 
         transform.position = Vector3.Lerp(
@@ -72,25 +66,28 @@ public class CamaraJugador : MonoBehaviour
         transform.LookAt(puntoObjetivo);
     }
 
-    private Vector3 AjustarPorColision(Vector3 origen, Vector3 destino)
+    private Vector3 AjustarPorColision(Vector3 origen, Vector3 direccion)
     {
-        Vector3 direccion = destino - origen;
-        float distanciaMax = direccion.magnitude;
-
         RaycastHit hit;
+
+        float distanciaFinal = distancia;
 
         if (Physics.SphereCast(
             origen,
             radioCamara,
-            direccion.normalized,
+            direccion,
             out hit,
-            distanciaMax,
-            capasColision
-        ))
+            distancia,
+            capasColision,
+            QueryTriggerInteraction.Ignore))
         {
-            return origen + direccion.normalized * (hit.distance - 0.2f);
+            distanciaFinal = Mathf.Clamp(
+                hit.distance - margenPared,
+                distanciaMinima,
+                distancia
+            );
         }
 
-        return destino;
+        return origen + direccion * distanciaFinal;
     }
 }
