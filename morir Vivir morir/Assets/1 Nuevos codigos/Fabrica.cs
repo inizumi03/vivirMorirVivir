@@ -21,7 +21,7 @@ public class Fabrica : MonoBehaviour
 
     private bool siendoCargada = false;
     private Rigidbody rb;
-
+    
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -86,6 +86,13 @@ public class Fabrica : MonoBehaviour
         {
             jugador.transform.position = transform.position;
             jugador.transform.rotation = transform.rotation;
+        }
+        movJugador mov =
+       jugador.GetComponent<movJugador>();
+
+        if (mov != null)
+        {
+            mov.enabled = true;
         }
     }
 

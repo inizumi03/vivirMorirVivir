@@ -4,44 +4,39 @@ using UnityEngine;
 
 public class LaserMortal : MonoBehaviour
 {
-    [Header("Laser")]
+    [Header("Referencia")]
     public Transform puntoSalida;
+    public Transform cuboLaser;
+
+    [Header("Distancia")]
     public float distanciaMaxima = 20f;
-    public LineRenderer lineaLaser;
 
-    [Header("Grosor")]
-    public float grosorLaser = 0.3f;
-
-    [Header("Capas")]
+    [Header("Detección")]
     public LayerMask capasDetectables;
+
+    private Vector3 escalaOriginal;
 
     private void Start()
     {
-        if (lineaLaser != null)
+        if (cuboLaser != null)
         {
-            lineaLaser.positionCount = 2;
-
-            // GROSOR
-            lineaLaser.startWidth = grosorLaser;
-            lineaLaser.endWidth = grosorLaser;
+            escalaOriginal = cuboLaser.localScale;
         }
     }
 
     private void Update()
     {
-        
         ActualizarLaser();
-
     }
 
     private void ActualizarLaser()
     {
-        if (puntoSalida == null || lineaLaser == null) return;
+        if (puntoSalida == null || cuboLaser == null) return;
 
         Vector3 origen = puntoSalida.position;
         Vector3 direccion = puntoSalida.forward;
 
-        Vector3 puntoFinal = origen + direccion * distanciaMaxima;
+        float distanciaFinal = distanciaMaxima;
 
         if (Physics.Raycast(
             origen,
@@ -50,7 +45,7 @@ public class LaserMortal : MonoBehaviour
             distanciaMaxima,
             capasDetectables))
         {
-            puntoFinal = hit.point;
+            distanciaFinal = hit.distance;
 
             // FABRICA
             Fabrica fabrica =
@@ -59,9 +54,6 @@ public class LaserMortal : MonoBehaviour
             if (fabrica != null)
             {
                 fabrica.VolverAPosicionSegura();
-
-                ActualizarLinea(origen, puntoFinal);
-                return;
             }
 
             // JUGADOR
@@ -74,13 +66,17 @@ public class LaserMortal : MonoBehaviour
             }
         }
 
-        ActualizarLinea(origen, puntoFinal);
-    }
+        Vector3 centro =
+            origen + direccion * (distanciaFinal / 2f);
 
-    private void ActualizarLinea(Vector3 inicio, Vector3 final)
-    {
-        lineaLaser.SetPosition(0, inicio);
-        lineaLaser.SetPosition(1, final);
-    }
+        cuboLaser.position = centro;
+        cuboLaser.rotation = puntoSalida.rotation;
 
+        // SOLO CAMBIA EL LARGO Z
+        cuboLaser.localScale = new Vector3(
+            escalaOriginal.x,
+            escalaOriginal.y,
+            distanciaFinal
+        );
+    }
 }
