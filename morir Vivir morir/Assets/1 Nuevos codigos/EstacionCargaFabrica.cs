@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class EstacionCargaFabrica : MonoBehaviour
 {
+    [Header("Objeto que se carga")]
+    public Fabrica fabrica;
+
     [Header("Carga")]
     public float energiaMaxima = 100f;
     public float energiaActual = 100f;
@@ -19,30 +22,50 @@ public class EstacionCargaFabrica : MonoBehaviour
     private void Start()
     {
         energiaActual = energiaMaxima;
+
         ActualizarBarra();
     }
 
-    private void OnCollisionStay(Collision collision)
+    private void OnTriggerStay(Collider other)
     {
         if (energiaActual <= 0f) return;
+        if (fabrica == null) return;
 
-        Fabrica fabrica =
-         collision.gameObject.GetComponent<Fabrica>();
+        // SOLO FUNCIONA CON LA FABRICA DEFINIDA
+        if (other.gameObject != fabrica.gameObject)
+            return;
 
-        if (fabrica != null)
-        {
-            float energiaACargar = energiaPorSegundo * Time.deltaTime;
+        // SI EL JUGADOR LA ESTA TRANSPORTANDO
+        // NO CARGA
+        if (fabrica.EstaSiendoTransportada())
+            return;
 
-            energiaACargar = Mathf.Min(energiaACargar, energiaActual);
+        float energiaACargar =
+            energiaPorSegundo * Time.deltaTime;
 
+        energiaACargar = Mathf.Min(
+            energiaACargar,
+            energiaActual
+        );
+
+        float energiaReal =
             fabrica.CargarEnergia(energiaACargar);
 
-            energiaActual -= energiaACargar;
-            energiaActual = Mathf.Clamp(energiaActual, 0f, energiaMaxima);
+        // SOLO GASTA SI REALMENTE CARGO
+        if (energiaReal > 0f)
+        {
+            energiaActual -= energiaReal;
+
+            energiaActual = Mathf.Clamp(
+                energiaActual,
+                0f,
+                energiaMaxima
+            );
 
             ActualizarBarra();
 
-            if (energiaActual <= 0f && destruirAlVaciarse)
+            if (energiaActual <= 0f &&
+                destruirAlVaciarse)
             {
                 Destroy(gameObject);
             }
@@ -53,7 +76,8 @@ public class EstacionCargaFabrica : MonoBehaviour
     {
         if (barraEnergiaEstacion != null)
         {
-            barraEnergiaEstacion.fillAmount = energiaActual / energiaMaxima;
+            barraEnergiaEstacion.fillAmount =
+                energiaActual / energiaMaxima;
         }
     }
 }
