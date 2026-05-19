@@ -76,5 +76,11 @@ public class Vida : MonoBehaviour
             rb.angularVelocity = Vector3.zero;
         }
     }
-
+    private void ActivarMovimiento()
+    {
+        if (Movimiento != null)
+        {
+            Movimiento.enabled = true;
+        }
+    }
 }

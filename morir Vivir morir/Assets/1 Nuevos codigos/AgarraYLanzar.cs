@@ -187,7 +187,7 @@ public class AgarraYLanzar : MonoBehaviour
         if (fabrica != null)
         {
             fabrica.GuardarPosicionSegura();
-            fabrica.MarcarCargada(true);
+            fabrica.MarcarTransportada(true);
 
             Debug.Log("FABRICA AGARRADA");
         }
@@ -249,7 +249,7 @@ public class AgarraYLanzar : MonoBehaviour
 
         if (fabrica != null)
         {
-            fabrica.MarcarCargada(false);
+            fabrica.MarcarTransportada(false);
 
             Debug.Log("FABRICA SOLTADA");
         }
@@ -284,7 +284,7 @@ public class AgarraYLanzar : MonoBehaviour
 
         if (fabrica != null)
         {
-            fabrica.MarcarCargada(false);
+            fabrica.MarcarTransportada(false);
 
             Debug.Log("FABRICA LANZADA");
         }
