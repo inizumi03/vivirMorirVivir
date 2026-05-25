@@ -176,6 +176,14 @@ public class AgarraYLanzar : MonoBehaviour
 
         objetoAgarrado = rbObjeto.gameObject;
 
+
+        QuedarQuieto quieto = objetoAgarrado.GetComponentInParent<QuedarQuieto>();
+
+        if (quieto != null)
+        {
+            quieto.Liberar();
+        }
+
         Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
 
         if (fabrica == null)
@@ -228,39 +236,50 @@ public class AgarraYLanzar : MonoBehaviour
 
     private void Soltar()
     {
-        if (objetoAgarrado == null || rbObjeto == null) return;
+        QuedarQuieto quieto = objetoAgarrado.GetComponentInParent<QuedarQuieto>();
 
-        ObjetoEstable datos = objetoAgarrado.GetComponent<ObjetoEstable>();
-
-        if (datos != null)
-            datos.IgnorarColisionConJugador(collidersJugador, false);
-
-        rbObjeto.useGravity = true;
-        rbObjeto.freezeRotation = false;
-        rbObjeto.velocity = Vector3.zero;
-        rbObjeto.angularVelocity = Vector3.zero;
-        Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
-
-        if (fabrica == null)
-            fabrica = objetoAgarrado.GetComponentInParent<Fabrica>();
-
-        if (fabrica == null)
-            fabrica = objetoAgarrado.GetComponentInChildren<Fabrica>();
-
-        if (fabrica != null)
+        if (quieto != null)
         {
-            fabrica.MarcarTransportada(false);
+            quieto.Congelar();
 
-            Debug.Log("FABRICA SOLTADA");
+            if (quieto != null)
+            {
+                quieto.Congelar();
+            }
+            if (objetoAgarrado == null || rbObjeto == null) return;
+
+            ObjetoEstable datos = objetoAgarrado.GetComponent<ObjetoEstable>();
+
+            if (datos != null)
+                datos.IgnorarColisionConJugador(collidersJugador, false);
+
+            rbObjeto.useGravity = true;
+            rbObjeto.freezeRotation = false;
+            rbObjeto.velocity = Vector3.zero;
+            rbObjeto.angularVelocity = Vector3.zero;
+            Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
+
+            if (fabrica == null)
+                fabrica = objetoAgarrado.GetComponentInParent<Fabrica>();
+
+            if (fabrica == null)
+                fabrica = objetoAgarrado.GetComponentInChildren<Fabrica>();
+
+            if (fabrica != null)
+            {
+                fabrica.MarcarTransportada(false);
+
+                Debug.Log("FABRICA SOLTADA");
+            }
+            objetoAgarrado = null;
+            rbObjeto = null;
+
+            cargandoLanzamiento = false;
+            fuerzaActual = fuerzaMinima;
+
+            if (lineaTrayectoria != null)
+                lineaTrayectoria.enabled = false;
         }
-        objetoAgarrado = null;
-        rbObjeto = null;
-
-        cargandoLanzamiento = false;
-        fuerzaActual = fuerzaMinima;
-
-        if (lineaTrayectoria != null)
-            lineaTrayectoria.enabled = false;
     }
 
     private void Lanzar()
