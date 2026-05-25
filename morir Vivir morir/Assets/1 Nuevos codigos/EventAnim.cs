@@ -4,21 +4,25 @@ using UnityEngine;
 
 public class EventAnim : MonoBehaviour
 {
-    public SaltJugador saltoJugador;
+    [Header("Animator")]
+    public Animator animator;
+
+    [Header("Referencias")]
     public AgarraYLanzar agarrarYLanzar;
 
-    public void EventoSaltar()
+    private void Awake()
     {
-        Debug.Log("EVENTO SALTAR ACTIVADO");
-
-        if (saltoJugador != null)
+        if (animator == null)
         {
-            Debug.Log("ENVIANDO SALTO A SaltJugador");
-            saltoJugador.EventoSaltar();
+            animator = GetComponent<Animator>();
         }
-        else
+    }
+
+    public void ActivarSalto()
+    {
+        if (animator != null)
         {
-            Debug.Log("SaltJugador ES NULL");
+            animator.SetTrigger("Salto");
         }
     }
 
@@ -29,6 +33,7 @@ public class EventAnim : MonoBehaviour
         if (agarrarYLanzar != null)
         {
             Debug.Log("ENVIANDO EVENTO A AgarrarYLanzar");
+
             agarrarYLanzar.EventoFinAgarre();
         }
         else

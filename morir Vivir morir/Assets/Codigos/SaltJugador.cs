@@ -6,7 +6,6 @@ public class SaltJugador : MonoBehaviour
 {
     [Header("Salto")]
     public float fuerzaSalto = 7f;
-    public int cantidadSaltosMax = 2;
 
     [Header("Suelo")]
     public Transform puntoSuelo;
@@ -17,18 +16,11 @@ public class SaltJugador : MonoBehaviour
     public AnimJugador animJugador;
 
     private Rigidbody rb;
-    private int saltosRestantes;
     private bool enSuelo;
-    private bool esperandoEventoSalto;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-    }
-
-    private void Start()
-    {
-        saltosRestantes = cantidadSaltosMax;
     }
 
     private void Update()
@@ -37,66 +29,41 @@ public class SaltJugador : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            PedirSalto();
+            Saltar();
         }
     }
 
-    private void PedirSalto()
+    private void Saltar()
     {
-        if (saltosRestantes <= 0)
-        {
-            Debug.Log("NO HAY SALTOS");
+        if (!enSuelo)
             return;
-        }
 
-        if (esperandoEventoSalto)
-        {
-            Debug.Log("ESPERANDO EVENTO");
-            return;
-        }
-
-        esperandoEventoSalto = true;
-
-        Debug.Log("ACTIVANDO ANIMACION DE SALTO");
-
+        // ANIMACION
         if (animJugador != null)
         {
             animJugador.ActivarSalto();
         }
-        else
-        {
-            Debug.Log("AnimJugador es NULL");
-        }
-    }
 
-    public void EventoSaltar()
-    {
-        Debug.Log("SALTO REAL");
+        rb.velocity = new Vector3(
+            rb.velocity.x,
+            0f,
+            rb.velocity.z
+        );
 
-        if (!esperandoEventoSalto)
-        {
-            Debug.Log("NO ESTABA ESPERANDO EVENTO");
-            return;
-        }
+        rb.AddForce(
+            Vector3.up * fuerzaSalto,
+            ForceMode.Impulse
+        );
 
-        if (saltosRestantes <= 0)
-        {
-            Debug.Log("SIN SALTOS RESTANTES");
-            return;
-        }
-
-        esperandoEventoSalto = false;
-        saltosRestantes--;
-
-        rb.velocity = new Vector3(rb.velocity.x, 0f, rb.velocity.z);
-        rb.AddForce(Vector3.up * fuerzaSalto, ForceMode.Impulse);
-
-        Debug.Log("FUERZA APLICADA");
+        enSuelo = false;
     }
 
     private void VerificarSuelo()
     {
-        Vector3 origen = puntoSuelo != null ? puntoSuelo.position : transform.position;
+        Vector3 origen =
+            puntoSuelo != null
+            ? puntoSuelo.position
+            : transform.position;
 
         enSuelo = Physics.Raycast(
             origen,
@@ -104,10 +71,27 @@ public class SaltJugador : MonoBehaviour
             distanciaSuelo,
             capaSuelo
         );
+    }
 
-        if (enSuelo && rb.velocity.y <= 0f)
-        {
-            saltosRestantes = cantidadSaltosMax;
-        }
+    private void OnDrawGizmosSelected()
+    {
+        Vector3 origen =
+            puntoSuelo != null
+            ? puntoSuelo.position
+            : transform.position;
+
+        Gizmos.color = Color.yellow;
+
+        Gizmos.DrawLine(
+            origen,
+            origen + Vector3.down * distanciaSuelo
+        );
+
+        Gizmos.color = Color.red;
+
+        Gizmos.DrawSphere(
+            origen + Vector3.down * distanciaSuelo,
+            0.05f
+        );
     }
 }
