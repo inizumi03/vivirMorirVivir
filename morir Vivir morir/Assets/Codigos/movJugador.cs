@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class movJugador : MonoBehaviour
 {
+    [Header("Estado")]
+    public bool puedeMoverse = true;
+
     [Header("Movimiento")]
     public float velocidad = 6f;
     public float velocidadRotacion = 12f;
@@ -20,12 +23,17 @@ public class movJugador : MonoBehaviour
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
-
         rb.freezeRotation = true;
     }
 
     private void Update()
     {
+        if (!puedeMoverse)
+        {
+            direccionMovimiento = Vector3.zero;
+            return;
+        }
+
         float horizontal = Input.GetAxisRaw("Horizontal");
         float vertical = Input.GetAxisRaw("Vertical");
 
@@ -43,6 +51,12 @@ public class movJugador : MonoBehaviour
 
     private void FixedUpdate()
     {
+        if (!puedeMoverse)
+        {
+            DetenerFisica();
+            return;
+        }
+
         MoverJugador();
         RotarJugador();
     }
@@ -79,5 +93,26 @@ public class movJugador : MonoBehaviour
             rotacionObjetivo,
             velocidadRotacion * Time.fixedDeltaTime
         );
+    }
+
+    public void BloquearMovimiento()
+    {
+        puedeMoverse = false;
+        direccionMovimiento = Vector3.zero;
+        velocidadActual = Vector3.zero;
+        DetenerFisica();
+    }
+
+    public void DesbloquearMovimiento()
+    {
+        puedeMoverse = true;
+    }
+
+    private void DetenerFisica()
+    {
+        if (rb == null) return;
+
+        rb.velocity = new Vector3(0f, rb.velocity.y, 0f);
+        rb.angularVelocity = Vector3.zero;
     }
 }

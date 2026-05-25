@@ -15,23 +15,26 @@ public class Vida : MonoBehaviour
 
     [Header("Pantalla negra")]
     public MuerteTrucha pantallaNegra;
+
+    [Header("Movimiento")]
     public movJugador Movimiento;
 
     private void OnCollisionStay(Collision collision)
-{
-    if (collision.collider.CompareTag(tagDaño))
     {
-        Morir();
+        if (collision.collider.CompareTag(tagDaño))
+        {
+            Morir();
+        }
     }
-}
 
-   private void OnTriggerStay(Collider other)
-{
-    if (other.CompareTag(tagDaño))
+    private void OnTriggerStay(Collider other)
     {
-        Morir();
+        if (other.CompareTag(tagDaño))
+        {
+            Morir();
+        }
     }
-}
+
     public void Morir()
     {
         if (muerto) return;
@@ -46,12 +49,14 @@ public class Vida : MonoBehaviour
                 pantallaNegra.FadeRespawn(() =>
                 {
                     fabrica.RespawnearJugador(gameObject);
+                    ActivarMovimiento();
                 })
             );
         }
         else if (fabrica != null)
         {
             fabrica.RespawnearJugador(gameObject);
+            ActivarMovimiento();
         }
 
         Invoke(nameof(ResetearMuerte), 0.5f);
@@ -61,26 +66,20 @@ public class Vida : MonoBehaviour
     {
         muerto = false;
     }
+
     private void DetenerMovimiento()
     {
         if (Movimiento != null)
         {
-            Movimiento.enabled = false;
-        }
-
-        Rigidbody rb = GetComponent<Rigidbody>();
-
-        if (rb != null)
-        {
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
+            Movimiento.BloquearMovimiento();
         }
     }
+
     private void ActivarMovimiento()
     {
         if (Movimiento != null)
         {
-            Movimiento.enabled = true;
+            Movimiento.DesbloquearMovimiento();
         }
     }
 }
