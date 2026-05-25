@@ -14,7 +14,22 @@ public class Boton : MonoBehaviour
     [Header("Estado")]
     public bool usarSoloUnaVez = true;
 
+    [Header("Visual")]
+    public Renderer rendererBoton;
+
+    public Material materialNormal;
+    public Material materialActivado;
+
     private bool activado = false;
+
+    private void Start()
+    {
+        // MATERIAL INICIAL
+        if (rendererBoton != null && materialNormal != null)
+        {
+            rendererBoton.material = materialNormal;
+        }
+    }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -24,6 +39,12 @@ public class Boton : MonoBehaviour
         if (activado && usarSoloUnaVez) return;
 
         activado = true;
+
+        // CAMBIAR MATERIAL
+        if (rendererBoton != null && materialActivado != null)
+        {
+            rendererBoton.material = materialActivado;
+        }
 
         if (puerta != null)
         {
