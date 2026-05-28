@@ -4748,12 +4748,20 @@ PrefabInstance:
       value: 0.631
       objectReference: {fileID: 0}
     - target: {fileID: 3915735751974384640, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3915735751974384640, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3958892944810022683, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
       propertyPath: m_Name
       value: puerta 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3958892944810022683, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3958892944810022683, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
       propertyPath: m_IsActive
@@ -4764,12 +4772,20 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 2100000, guid: 3ed8e61cc5a1d73428be0f30cfe1602d, type: 2}
     - target: {fileID: 6637814078122668895, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 6637814078122668895, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6774060845078080971, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
       propertyPath: m_Convex
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7086262315865501854, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 8179388777574893471, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
       propertyPath: m_Materials.Array.data[0]
@@ -4778,6 +4794,10 @@ PrefabInstance:
     - target: {fileID: 8214040890177596175, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
       propertyPath: m_Name
       value: puerta 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8214040890177596175, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
+      propertyPath: m_Layer
+      value: 10
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 6774060845078080971, guid: 1af328033d0406e42809eaddcb01da3c, type: 3}
@@ -12854,8 +12874,8 @@ Transform:
   m_GameObject: {fileID: 781878217}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 9.8932, y: 2.6, z: 26.7697}
-  m_LocalScale: {x: 21.910427, y: 2.1328, z: 51.18972}
+  m_LocalPosition: {x: 9.8932, y: 2.6, z: 26.8515}
+  m_LocalScale: {x: 21.910427, y: 2.1328, z: 51.020496}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1930448764}
@@ -15404,7 +15424,7 @@ MonoBehaviour:
   evitarParedes: 1
   capasColision:
     serializedVersion: 2
-    m_Bits: 1024
+    m_Bits: 1032
   radioCamara: 0.25
   margenPared: 0.25
 --- !u!1001 &968804358
@@ -25509,8 +25529,8 @@ Transform:
   m_GameObject: {fileID: 1576601782}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.3, z: 0}
-  m_LocalScale: {x: 1, y: 3.1809568, z: 1}
+  m_LocalPosition: {x: 0, y: -1.0221, z: 0}
+  m_LocalScale: {x: 1, y: 3.955838, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1930448764}
@@ -26230,6 +26250,7 @@ GameObject:
   - component: {fileID: 1608493190}
   - component: {fileID: 1608493189}
   - component: {fileID: 1608493188}
+  - component: {fileID: 1608493191}
   m_Layer: 3
   m_Name: 'piso fabrica '
   m_TagString: Untagged
@@ -26271,8 +26292,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.9999999, y: 1.2378638, z: 0.9999998}
-  m_Center: {x: 0, y: -0.11893212, z: 0}
+  m_Size: {x: 0.5140136, y: 0.9922521, z: 0.2957638}
+  m_Center: {x: 0.09459103, y: 11.389811, z: -0.2970895}
 --- !u!23 &1608493189
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -26323,6 +26344,27 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1608493186}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!65 &1608493191
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1608493186}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1.0000002, y: 1.0000001, z: 1.0000002}
+  m_Center: {x: -0.0000019073486, y: 0, z: 0.00000010430813}
 --- !u!1001 &1609074668
 PrefabInstance:
   m_ObjectHideFlags: 0
