@@ -28,14 +28,18 @@ public class QuedarQuieto : MonoBehaviour
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
 
-        rb.constraints = RigidbodyConstraints.FreezeAll;
+        rb.constraints =
+            RigidbodyConstraints.FreezePositionX |
+            RigidbodyConstraints.FreezePositionZ |
+            RigidbodyConstraints.FreezeRotation;
     }
 
     public void Liberar()
     {
         if (rb == null) return;
 
-        rb.constraints = RigidbodyConstraints.FreezeRotation;
+        rb.constraints =
+            RigidbodyConstraints.FreezeRotation;
     }
 
     private void OnCollisionEnter(Collision collision)

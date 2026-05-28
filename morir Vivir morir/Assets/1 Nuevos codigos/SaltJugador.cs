@@ -25,9 +25,16 @@ public class SaltJugador : MonoBehaviour
 
     private void Update()
     {
+        // NO HACER NADA SI EL JUEGO ESTA PAUSADO
+        if (Time.timeScale == 0f)
+            return;
+
         VerificarSuelo();
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (
+            Input.GetKeyDown(KeyCode.Space) ||
+            Input.GetKeyDown(KeyCode.JoystickButton1)
+        )
         {
             Saltar();
         }
@@ -38,7 +45,6 @@ public class SaltJugador : MonoBehaviour
         if (!enSuelo)
             return;
 
-        // ANIMACION
         if (animJugador != null)
         {
             animJugador.ActivarSalto();

@@ -1,16 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 public class MenuPausa : MonoBehaviour
 {
     [Header("Tecla opcional")]
     public bool usarTecla = true;
     public KeyCode teclaMenu = KeyCode.Escape;
 
+    [Header("Mando")]
+    public bool usarMando = true;
+    public KeyCode botonMandoMenu = KeyCode.JoystickButton9;
+
     [Header("Canvas")]
     public GameObject canvasMenu;
     public GameObject canvasTutorial;
+
+    [Header("Botones seleccionados")]
+    public GameObject primerBotonMenu;
+    public GameObject primerBotonTutorial;
 
     [Header("Panel que baja")]
     public RectTransform panelMenu;
@@ -37,9 +46,15 @@ public class MenuPausa : MonoBehaviour
 
     private void Update()
     {
-        if (!usarTecla) return;
+        bool presionoMenu = false;
 
-        if (Input.GetKeyDown(teclaMenu))
+        if (usarTecla && Input.GetKeyDown(teclaMenu))
+            presionoMenu = true;
+
+        if (usarMando && Input.GetKeyDown(botonMandoMenu))
+            presionoMenu = true;
+
+        if (presionoMenu)
         {
             if (pausado)
                 Reanudar();
@@ -51,7 +66,6 @@ public class MenuPausa : MonoBehaviour
     public void AbrirMenu()
     {
         pausado = true;
-
         Time.timeScale = 0f;
 
         Cursor.lockState = CursorLockMode.None;
@@ -63,6 +77,8 @@ public class MenuPausa : MonoBehaviour
         if (canvasMenu != null)
             canvasMenu.SetActive(true);
 
+        SeleccionarBoton(primerBotonMenu);
+
         if (rutinaMenu != null)
             StopCoroutine(rutinaMenu);
 
@@ -72,7 +88,6 @@ public class MenuPausa : MonoBehaviour
     public void Reanudar()
     {
         pausado = false;
-
         Time.timeScale = 1f;
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -94,6 +109,8 @@ public class MenuPausa : MonoBehaviour
 
         if (canvasTutorial != null)
             canvasTutorial.SetActive(true);
+
+        SeleccionarBoton(primerBotonTutorial);
     }
 
     public void VolverAlMenu()
@@ -106,15 +123,24 @@ public class MenuPausa : MonoBehaviour
 
         if (panelMenu != null)
             panelMenu.anchoredPosition = posicionVisible;
+
+        SeleccionarBoton(primerBotonMenu);
     }
 
     public void SalirJuego()
     {
         Time.timeScale = 1f;
-
         Application.Quit();
-
         Debug.Log("SALIR DEL JUEGO");
+    }
+
+    private void SeleccionarBoton(GameObject boton)
+    {
+        if (boton == null) return;
+        if (EventSystem.current == null) return;
+
+        EventSystem.current.SetSelectedGameObject(null);
+        EventSystem.current.SetSelectedGameObject(boton);
     }
 
     private IEnumerator CerrarMenu()

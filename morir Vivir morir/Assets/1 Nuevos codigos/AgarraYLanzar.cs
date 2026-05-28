@@ -7,6 +7,7 @@ public class AgarraYLanzar : MonoBehaviour
     [Header("Referencias")]
     public AnimJugador animJugador;
     public Transform puntoCarga;
+    public Transform puntoSoltar;
     public MonoBehaviour scriptMovimiento;
 
     [Header("Lanzamiento")]
@@ -46,7 +47,11 @@ public class AgarraYLanzar : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        bool presionoAgarrar =
+            Input.GetKeyDown(KeyCode.E) ||
+            Input.GetKeyDown(KeyCode.JoystickButton0);
+
+        if (presionoAgarrar)
         {
             if (objetoAgarrado == null)
                 IntentarAgarrar();
@@ -56,19 +61,31 @@ public class AgarraYLanzar : MonoBehaviour
 
         if (objetoAgarrado != null)
         {
-            if (Input.GetMouseButtonDown(0))
+            bool empezarLanzamiento =
+                Input.GetMouseButtonDown(0) ||
+                Input.GetKeyDown(KeyCode.JoystickButton7);
+
+            bool mantenerLanzamiento =
+                Input.GetMouseButton(0) ||
+                Input.GetKey(KeyCode.JoystickButton7);
+
+            bool soltarLanzamiento =
+                Input.GetMouseButtonUp(0) ||
+                Input.GetKeyUp(KeyCode.JoystickButton7);
+
+            if (empezarLanzamiento)
             {
                 cargandoLanzamiento = true;
                 cargaSubiendo = true;
                 fuerzaActual = fuerzaMinima;
             }
 
-            if (Input.GetMouseButton(0) && cargandoLanzamiento)
+            if (mantenerLanzamiento && cargandoLanzamiento)
             {
                 CargarFuerzaOscilante();
             }
 
-            if (Input.GetMouseButtonUp(0) && cargandoLanzamiento)
+            if (soltarLanzamiento && cargandoLanzamiento)
             {
                 Lanzar();
             }
@@ -176,7 +193,6 @@ public class AgarraYLanzar : MonoBehaviour
 
         objetoAgarrado = rbObjeto.gameObject;
 
-
         QuedarQuieto quieto = objetoAgarrado.GetComponentInParent<QuedarQuieto>();
 
         if (quieto != null)
@@ -199,6 +215,7 @@ public class AgarraYLanzar : MonoBehaviour
 
             Debug.Log("FABRICA AGARRADA");
         }
+
         ObjetoEstable datos = objetoAgarrado.GetComponent<ObjetoEstable>();
 
         if (datos != null)
@@ -236,50 +253,53 @@ public class AgarraYLanzar : MonoBehaviour
 
     private void Soltar()
     {
+        if (objetoAgarrado == null || rbObjeto == null) return;
+
+        ObjetoEstable datos = objetoAgarrado.GetComponent<ObjetoEstable>();
+
+        if (datos != null)
+            datos.IgnorarColisionConJugador(collidersJugador, false);
+
+        if (puntoSoltar != null)
+        {
+            objetoAgarrado.transform.position = puntoSoltar.position;
+            objetoAgarrado.transform.rotation = puntoSoltar.rotation;
+        }
+
+        rbObjeto.useGravity = true;
+        rbObjeto.freezeRotation = false;
+        rbObjeto.velocity = Vector3.zero;
+        rbObjeto.angularVelocity = Vector3.zero;
+
+        Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
+
+        if (fabrica == null)
+            fabrica = objetoAgarrado.GetComponentInParent<Fabrica>();
+
+        if (fabrica == null)
+            fabrica = objetoAgarrado.GetComponentInChildren<Fabrica>();
+
+        if (fabrica != null)
+        {
+            fabrica.MarcarTransportada(false);
+            Debug.Log("FABRICA SOLTADA");
+        }
+
         QuedarQuieto quieto = objetoAgarrado.GetComponentInParent<QuedarQuieto>();
 
         if (quieto != null)
         {
             quieto.Congelar();
-
-            if (quieto != null)
-            {
-                quieto.Congelar();
-            }
-            if (objetoAgarrado == null || rbObjeto == null) return;
-
-            ObjetoEstable datos = objetoAgarrado.GetComponent<ObjetoEstable>();
-
-            if (datos != null)
-                datos.IgnorarColisionConJugador(collidersJugador, false);
-
-            rbObjeto.useGravity = true;
-            rbObjeto.freezeRotation = false;
-            rbObjeto.velocity = Vector3.zero;
-            rbObjeto.angularVelocity = Vector3.zero;
-            Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
-
-            if (fabrica == null)
-                fabrica = objetoAgarrado.GetComponentInParent<Fabrica>();
-
-            if (fabrica == null)
-                fabrica = objetoAgarrado.GetComponentInChildren<Fabrica>();
-
-            if (fabrica != null)
-            {
-                fabrica.MarcarTransportada(false);
-
-                Debug.Log("FABRICA SOLTADA");
-            }
-            objetoAgarrado = null;
-            rbObjeto = null;
-
-            cargandoLanzamiento = false;
-            fuerzaActual = fuerzaMinima;
-
-            if (lineaTrayectoria != null)
-                lineaTrayectoria.enabled = false;
         }
+
+        objetoAgarrado = null;
+        rbObjeto = null;
+
+        cargandoLanzamiento = false;
+        fuerzaActual = fuerzaMinima;
+
+        if (lineaTrayectoria != null)
+            lineaTrayectoria.enabled = false;
     }
 
     private void Lanzar()
@@ -293,6 +313,7 @@ public class AgarraYLanzar : MonoBehaviour
 
         if (datos != null)
             datos.IgnorarColisionConJugador(collidersJugador, false);
+
         Fabrica fabrica = objeto.GetComponent<Fabrica>();
 
         if (fabrica == null)
@@ -304,9 +325,9 @@ public class AgarraYLanzar : MonoBehaviour
         if (fabrica != null)
         {
             fabrica.MarcarTransportada(false);
-
             Debug.Log("FABRICA LANZADA");
         }
+
         objetoAgarrado = null;
         rbObjeto = null;
 

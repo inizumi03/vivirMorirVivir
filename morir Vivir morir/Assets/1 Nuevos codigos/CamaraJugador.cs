@@ -7,9 +7,20 @@ public class CamaraJugador : MonoBehaviour
     [Header("Objetivo")]
     public Transform objetivo;
 
-    [Header("Rotación Mouse")]
+    [Header("Mouse")]
     public float sensibilidadX = 200f;
     public float sensibilidadY = 150f;
+
+    [Header("Mando")]
+    public string ejeMandoX = "CamaraMandoX";
+    public string ejeMandoY = "CamaraMandoY";
+
+    public float sensibilidadMandoX = 220f;
+    public float sensibilidadMandoY = 180f;
+
+    public float zonaMuerta = 0.15f;
+
+    [Header("Limites")]
     public float minY = -30f;
     public float maxY = 60f;
 
@@ -38,23 +49,59 @@ public class CamaraJugador : MonoBehaviour
     {
         if (objetivo == null) return;
 
-        float mouseX = Input.GetAxis("Mouse X") * sensibilidadX * Time.deltaTime;
-        float mouseY = Input.GetAxis("Mouse Y") * sensibilidadY * Time.deltaTime;
+        // MOUSE
+        float mouseX =
+            Input.GetAxis("Mouse X") *
+            sensibilidadX *
+            Time.deltaTime;
 
-        rotacionX += mouseX;
-        rotacionY -= mouseY;
-        rotacionY = Mathf.Clamp(rotacionY, minY, maxY);
+        float mouseY =
+            Input.GetAxis("Mouse Y") *
+            sensibilidadY *
+            Time.deltaTime;
 
-        Quaternion rotacion = Quaternion.Euler(rotacionY, rotacionX, 0f);
+        // MANDO
+        float mandoX = Input.GetAxis(ejeMandoX);
+        float mandoY = Input.GetAxis(ejeMandoY);
 
-        Vector3 puntoObjetivo = objetivo.position + Vector3.up * altura;
-        Vector3 direccion = rotacion * Vector3.back;
+        if (Mathf.Abs(mandoX) < zonaMuerta)
+            mandoX = 0f;
 
-        Vector3 posicionDeseada = puntoObjetivo + direccion * distancia;
+        if (Mathf.Abs(mandoY) < zonaMuerta)
+            mandoY = 0f;
+
+        mandoX *= sensibilidadMandoX * Time.deltaTime;
+        mandoY *= sensibilidadMandoY * Time.deltaTime;
+
+        // ROTACION
+        rotacionX += mouseX + mandoX;
+        rotacionY -= mouseY + mandoY;
+
+        rotacionY = Mathf.Clamp(
+            rotacionY,
+            minY,
+            maxY
+        );
+
+        Quaternion rotacion =
+            Quaternion.Euler(rotacionY, rotacionX, 0f);
+
+        Vector3 puntoObjetivo =
+            objetivo.position + Vector3.up * altura;
+
+        Vector3 direccion =
+            rotacion * Vector3.back;
+
+        Vector3 posicionDeseada =
+            puntoObjetivo + direccion * distancia;
 
         if (evitarParedes)
         {
-            posicionDeseada = AjustarPorColision(puntoObjetivo, direccion);
+            posicionDeseada =
+                AjustarPorColision(
+                    puntoObjetivo,
+                    direccion
+                );
         }
 
         transform.position = Vector3.Lerp(
@@ -66,7 +113,10 @@ public class CamaraJugador : MonoBehaviour
         transform.LookAt(puntoObjetivo);
     }
 
-    private Vector3 AjustarPorColision(Vector3 origen, Vector3 direccion)
+    private Vector3 AjustarPorColision(
+        Vector3 origen,
+        Vector3 direccion
+    )
     {
         RaycastHit hit;
 
