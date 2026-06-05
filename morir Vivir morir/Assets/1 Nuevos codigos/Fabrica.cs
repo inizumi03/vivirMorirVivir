@@ -11,8 +11,10 @@ public class Fabrica : MonoBehaviour
     [Header("Respawn si muero transportando fábrica")]
     public Transform puntoControlActual;
 
-    [Header("Prefab cuerpo muerto")]
-    public GameObject cuerpoMuertoPrefab;
+    [Header("Prefabs cuerpos muertos")]
+    public GameObject cuerpoBasePrefab;
+    public GameObject cuerpoSaltoPrefab;
+    public GameObject cuerpoMetalPrefab;
 
     [Header("Daño")]
     public string tagDaño = "Daño";
@@ -28,7 +30,7 @@ public class Fabrica : MonoBehaviour
     public float energiaMaxima = 100f;
     public float energiaActual = 100f;
     public float energiaPerdidaPorRespawn = 25f;
-
+    public CambioForma cambioForma;
     public Image barraEnergia;
 
     [Header("Derrota")]
@@ -121,6 +123,8 @@ public class Fabrica : MonoBehaviour
 
             siendoTransportada = false;
 
+            AplicarCambioForma(jugador);
+
             return;
         }
 
@@ -148,20 +152,18 @@ public class Fabrica : MonoBehaviour
         {
             mov.enabled = true;
         }
-        CambioForma cambioForma = jugador.GetComponent<CambioForma>();
 
-        if (cambioForma != null)
-        {
-            cambioForma.AplicarFormaPendiente();
-        }
+        AplicarCambioForma(jugador);
     }
 
     private void CrearCuerpo(GameObject jugador)
     {
-        if (cuerpoMuertoPrefab == null) return;
+        GameObject prefabElegido = ObtenerPrefabCuerpo(jugador);
+
+        if (prefabElegido == null) return;
 
         GameObject cuerpo = Instantiate(
-            cuerpoMuertoPrefab,
+            prefabElegido,
             jugador.transform.position,
             jugador.transform.rotation
         );
@@ -172,6 +174,40 @@ public class Fabrica : MonoBehaviour
         if (anim != null)
         {
             anim.enabled = false;
+        }
+    }
+
+    private GameObject ObtenerPrefabCuerpo(GameObject jugador)
+    {
+        CambioForma cambioForma =
+            jugador.GetComponent<CambioForma>();
+
+        if (cambioForma == null)
+            return cuerpoBasePrefab;
+
+        int formaActual =
+            cambioForma.ObtenerFormaActual();
+
+        if (formaActual == 0)
+            return cuerpoBasePrefab;
+
+        if (formaActual == 1)
+            return cuerpoSaltoPrefab;
+
+        if (formaActual == 2)
+            return cuerpoMetalPrefab;
+
+        return cuerpoBasePrefab;
+    }
+
+    private void AplicarCambioForma(GameObject jugador)
+    {
+        CambioForma cambioForma =
+            jugador.GetComponent<CambioForma>();
+
+        if (cambioForma != null)
+        {
+            cambioForma.AplicarFormaPendiente();
         }
     }
 

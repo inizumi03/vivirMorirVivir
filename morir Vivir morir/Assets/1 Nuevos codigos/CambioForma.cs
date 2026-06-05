@@ -61,7 +61,10 @@ public class CambioForma : MonoBehaviour
         if (forma == 2 && robotMetal != null)
             robotMetal.SetActive(true);
     }
-
+    public int ObtenerFormaActual()
+    {
+        return formaActual;
+    }
     public bool EstaEnFormaSalto()
     {
         return formaActual == 1;
