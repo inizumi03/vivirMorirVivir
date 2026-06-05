@@ -148,6 +148,12 @@ public class Fabrica : MonoBehaviour
         {
             mov.enabled = true;
         }
+        CambioForma cambioForma = jugador.GetComponent<CambioForma>();
+
+        if (cambioForma != null)
+        {
+            cambioForma.AplicarFormaPendiente();
+        }
     }
 
     private void CrearCuerpo(GameObject jugador)

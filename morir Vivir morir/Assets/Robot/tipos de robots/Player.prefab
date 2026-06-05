@@ -199,6 +199,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animJugador: {fileID: 394211136164574047}
   puntoCarga: {fileID: 1943176043495331550}
+  puntoSoltar: {fileID: 0}
   scriptMovimiento: {fileID: 126805197427729798}
   fuerzaMinima: 6
   fuerzaMaxima: 18

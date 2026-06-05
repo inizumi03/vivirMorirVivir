@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class AnimJugador : MonoBehaviour
 {
+    [Header("Animators por forma")]
+    public Animator animatorBase;
+    public Animator animatorSalto;
+    public Animator animatorMetal;
+
     [Header("Referencias")]
-    public Animator animator;
     public Rigidbody rbJugador;
 
     [Header("Suelo")]
@@ -24,8 +28,25 @@ public class AnimJugador : MonoBehaviour
         ActualizarMovimiento();
     }
 
+    private Animator ObtenerAnimatorActivo()
+    {
+        if (animatorBase != null && animatorBase.gameObject.activeInHierarchy)
+            return animatorBase;
+
+        if (animatorSalto != null && animatorSalto.gameObject.activeInHierarchy)
+            return animatorSalto;
+
+        if (animatorMetal != null && animatorMetal.gameObject.activeInHierarchy)
+            return animatorMetal;
+
+        return null;
+    }
+
     private void RevisarSuelo()
     {
+        Animator animator = ObtenerAnimatorActivo();
+        if (animator == null) return;
+
         Vector3 origen = puntoSuelo != null ? puntoSuelo.position : transform.position;
 
         enSuelo = Physics.Raycast(
@@ -40,6 +61,8 @@ public class AnimJugador : MonoBehaviour
 
     private void ActualizarMovimiento()
     {
+        Animator animator = ObtenerAnimatorActivo();
+        if (animator == null) return;
         if (rbJugador == null) return;
 
         Vector3 velocidadHorizontal = new Vector3(
@@ -53,11 +76,19 @@ public class AnimJugador : MonoBehaviour
 
     public void ActivarSalto()
     {
-        animator.SetTrigger("salto");
+        Animator animator = ObtenerAnimatorActivo();
+        if (animator != null)
+        {
+            animator.SetTrigger("salto");
+        }
     }
 
     public void ActivarAgarre()
     {
-        animator.SetTrigger("agarrar");
+        Animator animator = ObtenerAnimatorActivo();
+        if (animator != null)
+        {
+            animator.SetTrigger("agarrar");
+        }
     }
 }

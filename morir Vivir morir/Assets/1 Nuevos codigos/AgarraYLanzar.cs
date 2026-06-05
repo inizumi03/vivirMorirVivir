@@ -31,7 +31,7 @@ public class AgarraYLanzar : MonoBehaviour
     private bool cargandoLanzamiento;
     private bool cargaSubiendo = true;
     private float fuerzaActual;
-
+    public CambioForma cambioForma;
     private void Awake()
     {
         rbJugador = GetComponent<Rigidbody>();
@@ -152,6 +152,10 @@ public class AgarraYLanzar : MonoBehaviour
 
     private void IntentarAgarrar()
     {
+        if (cambioForma != null && cambioForma.EstaEnFormaSalto())
+        {
+            return;
+        }
         if (objetoEnRango == null) return;
         if (agarrandoAnimacion) return;
 
