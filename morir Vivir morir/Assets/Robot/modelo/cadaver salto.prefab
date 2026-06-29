@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 448647896984184045}
   - component: {fileID: 3462336001200774916}
   - component: {fileID: 9023486936323886665}
+  - component: {fileID: 7001095666793799728}
   m_Layer: 3
   m_Name: cadaver salto
   m_TagString: Agarrable
@@ -118,6 +119,18 @@ MonoBehaviour:
   velocidadAcomodo: 5
   bloquearRotacionX: 1
   bloquearRotacionZ: 1
+--- !u!114 &7001095666793799728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3947708304889539664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a874b5922249002478f6189006d8abe8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &3976194000553924862
 GameObject:
   m_ObjectHideFlags: 0
@@ -296,7 +309,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 836e2675a6da05542a2961cb5b357f8c, type: 2}
+  - {fileID: 2100000, guid: 5259c996cb9ff7c47ac2f17676a0c61e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -495,11 +508,11 @@ PrefabInstance:
     - target: {fileID: -5945468486595911040, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 16e6bafd2abdac24d9f9f4f1c3230616, type: 2}
+      objectReference: {fileID: 2100000, guid: eab46869cc083de4392276e7f9188139, type: 2}
     - target: {fileID: -5945468486595911040, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
-      objectReference: {fileID: 2100000, guid: 836e2675a6da05542a2961cb5b357f8c, type: 2}
+      objectReference: {fileID: 2100000, guid: 5259c996cb9ff7c47ac2f17676a0c61e, type: 2}
     - target: {fileID: -5871308227656103855, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_Layer
       value: 3
@@ -807,11 +820,11 @@ PrefabInstance:
     - target: {fileID: 1505932942883288102, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: 836e2675a6da05542a2961cb5b357f8c, type: 2}
+      objectReference: {fileID: 2100000, guid: 5259c996cb9ff7c47ac2f17676a0c61e, type: 2}
     - target: {fileID: 1505932942883288102, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_Materials.Array.data[1]
       value: 
-      objectReference: {fileID: 2100000, guid: 16e6bafd2abdac24d9f9f4f1c3230616, type: 2}
+      objectReference: {fileID: 2100000, guid: eab46869cc083de4392276e7f9188139, type: 2}
     - target: {fileID: 1623356086009108483, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_Layer
       value: 3
