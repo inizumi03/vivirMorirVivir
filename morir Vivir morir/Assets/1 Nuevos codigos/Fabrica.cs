@@ -32,7 +32,10 @@ public class Fabrica : MonoBehaviour
     public float energiaPerdidaPorRespawn = 25f;
     public CambioForma cambioForma;
     public Image barraEnergia;
+    [Header("Clones")]
+    public int maximoClones = 5;
 
+    private Queue<GameObject> clones = new Queue<GameObject>();
     [Header("Derrota")]
     public GameObject canvasDerrota;
 
@@ -160,7 +163,8 @@ public class Fabrica : MonoBehaviour
     {
         GameObject prefabElegido = ObtenerPrefabCuerpo(jugador);
 
-        if (prefabElegido == null) return;
+        if (prefabElegido == null)
+            return;
 
         GameObject cuerpo = Instantiate(
             prefabElegido,
@@ -168,8 +172,21 @@ public class Fabrica : MonoBehaviour
             jugador.transform.rotation
         );
 
-        Animator anim =
-            cuerpo.GetComponent<Animator>();
+        // Guarda el nuevo clon
+        clones.Enqueue(cuerpo);
+
+        // Si supera el límite, destruye el más viejo
+        if (clones.Count > maximoClones)
+        {
+            GameObject clonViejo = clones.Dequeue();
+
+            if (clonViejo != null)
+            {
+                Destroy(clonViejo);
+            }
+        }
+
+        Animator anim = cuerpo.GetComponent<Animator>();
 
         if (anim != null)
         {
