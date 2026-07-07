@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class ReceptorLuz : MonoBehaviour
 {
-    [Header("Estado")]
-    public bool recibiendoLuz;
+    [Header("Controlador")]
+    public ControlReceptoresLuz controlador;
 
-    [Header("Objeto a activar")]
-    public GameObject objetoActivar;
-
-    private void Update()
-    {
-        if (objetoActivar != null)
-            objetoActivar.SetActive(recibiendoLuz);
-
-        recibiendoLuz = false;
-    }
+    private bool yaRecibioLuz = false;
 
     public void RecibirLuz()
     {
-        recibiendoLuz = true;
+        if (yaRecibioLuz) return;
+
+        yaRecibioLuz = true;
+
+        if (controlador != null)
+        {
+            controlador.SumarReceptor();
+        }
+
+        Debug.Log("RECEPTOR ACTIVADO");
     }
 }
