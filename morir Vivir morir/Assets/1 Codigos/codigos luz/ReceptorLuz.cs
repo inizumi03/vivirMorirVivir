@@ -7,13 +7,33 @@ public class ReceptorLuz : MonoBehaviour
     [Header("Controlador")]
     public ControlReceptoresLuz controlador;
 
+    [Header("Visual")]
+    public Renderer objetoVisual;
+    public Material materialActivado;
+
+    private Material materialOriginal;
+
     private bool yaRecibioLuz = false;
+
+    private void Start()
+    {
+        if (objetoVisual != null)
+        {
+            materialOriginal = objetoVisual.material;
+        }
+    }
 
     public void RecibirLuz()
     {
-        if (yaRecibioLuz) return;
+        if (yaRecibioLuz)
+            return;
 
         yaRecibioLuz = true;
+
+        if (objetoVisual != null && materialActivado != null)
+        {
+            objetoVisual.material = materialActivado;
+        }
 
         if (controlador != null)
         {

@@ -47,6 +47,10 @@ public class AgarraYLanzar : MonoBehaviour
 
     private void Update()
     {
+        if (!PuedeAgarrarObjetos() && objetoAgarrado == null)
+        {
+            objetoEnRango = null;
+        }
         bool presionoAgarrar =
             Input.GetKeyDown(KeyCode.E) ||
             Input.GetKeyDown(KeyCode.JoystickButton0);
@@ -141,6 +145,12 @@ public class AgarraYLanzar : MonoBehaviour
 
     public void SetObjetoEnRango(GameObject obj)
     {
+        if (!PuedeAgarrarObjetos())
+        {
+            objetoEnRango = null;
+            return;
+        }
+
         objetoEnRango = obj;
     }
 
@@ -152,12 +162,15 @@ public class AgarraYLanzar : MonoBehaviour
 
     private void IntentarAgarrar()
     {
-        if (cambioForma != null && cambioForma.EstaEnFormaSalto())
-        {
+        // SOLO LA FORMA BASE PUEDE AGARRAR
+        if (!PuedeAgarrarObjetos())
             return;
-        }
-        if (objetoEnRango == null) return;
-        if (agarrandoAnimacion) return;
+
+        if (objetoEnRango == null)
+            return;
+
+        if (agarrandoAnimacion)
+            return;
 
         agarrandoAnimacion = true;
 
@@ -380,5 +393,11 @@ public class AgarraYLanzar : MonoBehaviour
 
             lineaTrayectoria.SetPosition(i, posicion);
         }
+    }
+
+    public bool PuedeAgarrarObjetos()
+    {
+        return cambioForma != null &&
+               cambioForma.EstaEnFormaBase();
     }
 }

@@ -16,28 +16,41 @@ public class Fabrica : MonoBehaviour
     public GameObject cuerpoSaltoPrefab;
     public GameObject cuerpoMetalPrefab;
 
+    [Header("Límite de clones por forma")]
+    public int maxClonesBase = 0;
+    public int maxClonesSalto = 5;
+    public int maxClonesMetal = 2;
+
     [Header("Daño")]
     public string tagDaño = "Daño";
-
-    private Vector3 ultimaPosicionSegura;
-    private Quaternion ultimaRotacionSegura;
-
-    private bool siendoTransportada = false;
-
-    private Rigidbody rb;
 
     [Header("Energía")]
     public float energiaMaxima = 100f;
     public float energiaActual = 100f;
     public float energiaPerdidaPorRespawn = 25f;
-    public CambioForma cambioForma;
     public Image barraEnergia;
-    [Header("Clones")]
-    public int maximoClones = 5;
 
-    private Queue<GameObject> clones = new Queue<GameObject>();
+    [Header("Cambio de forma")]
+    public CambioForma cambioForma;
+
     [Header("Derrota")]
     public GameObject canvasDerrota;
+
+    private Vector3 ultimaPosicionSegura;
+    private Quaternion ultimaRotacionSegura;
+
+    private bool siendoTransportada = false;
+    private Rigidbody rb;
+
+    // Cada forma guarda sus propios clones.
+    private Queue<GameObject> clonesBase =
+        new Queue<GameObject>();
+
+    private Queue<GameObject> clonesSalto =
+        new Queue<GameObject>();
+
+    private Queue<GameObject> clonesMetal =
+        new Queue<GameObject>();
 
     private void Awake()
     {
@@ -46,7 +59,6 @@ public class Fabrica : MonoBehaviour
         GuardarPosicionSegura();
 
         energiaActual = energiaMaxima;
-
         ActualizarBarraEnergia();
 
         if (canvasDerrota != null)
@@ -78,6 +90,7 @@ public class Fabrica : MonoBehaviour
 
     public void RespawnearJugador(GameObject jugador)
     {
+        // Crea el cuerpo usando la forma con la que murió.
         CrearCuerpo(jugador);
 
         PerderEnergia();
@@ -92,23 +105,18 @@ public class Fabrica : MonoBehaviour
 
         if (siendoTransportada)
         {
-            Transform puntoFinal =
-                puntoControlActual != null
-                ? puntoControlActual
-                : null;
-
-            if (puntoFinal != null)
+            if (puntoControlActual != null)
             {
                 MoverFabrica(
-                    puntoFinal.position,
-                    puntoFinal.rotation
+                    puntoControlActual.position,
+                    puntoControlActual.rotation
                 );
 
                 jugador.transform.position =
-                    puntoFinal.position;
+                    puntoControlActual.position;
 
                 jugador.transform.rotation =
-                    puntoFinal.rotation;
+                    puntoControlActual.rotation;
             }
             else
             {
@@ -148,12 +156,12 @@ public class Fabrica : MonoBehaviour
                 transform.rotation;
         }
 
-        movJugador mov =
+        movJugador movimiento =
             jugador.GetComponent<movJugador>();
 
-        if (mov != null)
+        if (movimiento != null)
         {
-            mov.enabled = true;
+            movimiento.enabled = true;
         }
 
         AplicarCambioForma(jugador);
@@ -161,10 +169,28 @@ public class Fabrica : MonoBehaviour
 
     private void CrearCuerpo(GameObject jugador)
     {
-        GameObject prefabElegido = ObtenerPrefabCuerpo(jugador);
+        CambioForma cambio =
+            jugador.GetComponent<CambioForma>();
 
-        if (prefabElegido == null)
+        int formaAlMorir = 0;
+
+        if (cambio != null)
+        {
+            formaAlMorir = cambio.ObtenerFormaActual();
+        }
+
+        GameObject prefabElegido =
+            ObtenerPrefabSegunForma(formaAlMorir);
+
+        int limite =
+            ObtenerLimiteSegunForma(formaAlMorir);
+
+        // Por ejemplo, la forma base tiene límite 0,
+        // así que no genera ningún clon.
+        if (prefabElegido == null || limite <= 0)
+        {
             return;
+        }
 
         GameObject cuerpo = Instantiate(
             prefabElegido,
@@ -172,59 +198,135 @@ public class Fabrica : MonoBehaviour
             jugador.transform.rotation
         );
 
-        // Guarda el nuevo clon
-        clones.Enqueue(cuerpo);
+        Animator animacion =
+            cuerpo.GetComponentInChildren<Animator>();
 
-        // Si supera el límite, destruye el más viejo
-        if (clones.Count > maximoClones)
+        if (animacion != null)
         {
-            GameObject clonViejo = clones.Dequeue();
-
-            if (clonViejo != null)
-            {
-                Destroy(clonViejo);
-            }
+            animacion.enabled = false;
         }
 
-        Animator anim = cuerpo.GetComponent<Animator>();
-
-        if (anim != null)
-        {
-            anim.enabled = false;
-        }
+        RegistrarClon(
+            cuerpo,
+            formaAlMorir,
+            limite
+        );
     }
 
-    private GameObject ObtenerPrefabCuerpo(GameObject jugador)
+    private GameObject ObtenerPrefabSegunForma(int forma)
     {
-        CambioForma cambioForma =
-            jugador.GetComponent<CambioForma>();
-
-        if (cambioForma == null)
+        if (forma == 0)
+        {
             return cuerpoBasePrefab;
+        }
 
-        int formaActual =
-            cambioForma.ObtenerFormaActual();
-
-        if (formaActual == 0)
-            return cuerpoBasePrefab;
-
-        if (formaActual == 1)
+        if (forma == 1)
+        {
             return cuerpoSaltoPrefab;
+        }
 
-        if (formaActual == 2)
+        if (forma == 2)
+        {
             return cuerpoMetalPrefab;
+        }
 
         return cuerpoBasePrefab;
     }
 
+    private int ObtenerLimiteSegunForma(int forma)
+    {
+        if (forma == 0)
+        {
+            return maxClonesBase;
+        }
+
+        if (forma == 1)
+        {
+            return maxClonesSalto;
+        }
+
+        if (forma == 2)
+        {
+            return maxClonesMetal;
+        }
+
+        return 0;
+    }
+
+    private void RegistrarClon(
+        GameObject nuevoClon,
+        int forma,
+        int limite)
+    {
+        Queue<GameObject> colaElegida =
+            ObtenerColaSegunForma(forma);
+
+        if (colaElegida == null)
+        {
+            Destroy(nuevoClon);
+            return;
+        }
+
+        LimpiarReferenciasDestruidas(colaElegida);
+
+        colaElegida.Enqueue(nuevoClon);
+
+        while (colaElegida.Count > limite)
+        {
+            GameObject clonMasViejo =
+                colaElegida.Dequeue();
+
+            if (clonMasViejo != null)
+            {
+                Destroy(clonMasViejo);
+            }
+        }
+    }
+
+    private Queue<GameObject> ObtenerColaSegunForma(int forma)
+    {
+        if (forma == 0)
+        {
+            return clonesBase;
+        }
+
+        if (forma == 1)
+        {
+            return clonesSalto;
+        }
+
+        if (forma == 2)
+        {
+            return clonesMetal;
+        }
+
+        return null;
+    }
+
+    private void LimpiarReferenciasDestruidas(
+        Queue<GameObject> cola)
+    {
+        int cantidad = cola.Count;
+
+        for (int i = 0; i < cantidad; i++)
+        {
+            GameObject clon = cola.Dequeue();
+
+            if (clon != null)
+            {
+                cola.Enqueue(clon);
+            }
+        }
+    }
+
     private void AplicarCambioForma(GameObject jugador)
     {
-        CambioForma cambioForma =
+        CambioForma cambio =
             jugador.GetComponent<CambioForma>();
 
-        if (cambioForma != null)
+        if (cambio != null)
         {
-            cambioForma.AplicarFormaPendiente();
+            cambio.AplicarFormaPendiente();
         }
     }
 
@@ -309,7 +411,9 @@ public class Fabrica : MonoBehaviour
     public float CargarEnergia(float cantidad)
     {
         if (energiaActual >= energiaMaxima)
+        {
             return 0f;
+        }
 
         float energiaAntes = energiaActual;
 

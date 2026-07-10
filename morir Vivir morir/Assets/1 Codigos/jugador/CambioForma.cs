@@ -104,4 +104,9 @@ public class CambioForma : MonoBehaviour
     {
         return formaActual == 1;
     }
+
+    public bool EstaEnFormaBase()
+    {
+        return formaActual == 0;
+    }
 }

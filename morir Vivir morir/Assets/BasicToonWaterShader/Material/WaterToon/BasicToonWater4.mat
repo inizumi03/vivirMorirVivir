@@ -144,14 +144,14 @@ Material:
     - _WaveStrength: 0.591
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0, g: 0.6698113, b: 0.04996887, a: 0.87058824}
+    - _Color: {r: 0.3584906, g: 0.093349464, b: 0.028746892, a: 0.87058824}
     - _DeepColor: {r: 0.4762816, g: 0.7215106, b: 0.7264151, a: 0}
     - _EdgeColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FoamColor: {r: 0, g: 0, b: 0, a: 1}
     - _HologramColor: {r: 1, g: 1, b: 1, a: 1}
     - _MainColor: {r: 1, g: 1, b: 1, a: 0.5}
-    - _OutlineColor: {r: 0.09083248, g: 0.7169812, b: 0.07102172, a: 1}
+    - _OutlineColor: {r: 0.3018868, g: 0.06123176, b: 0.09404832, a: 1}
     - _ShallowColor: {r: 0, g: 0.8595505, b: 1, a: 0.725}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
