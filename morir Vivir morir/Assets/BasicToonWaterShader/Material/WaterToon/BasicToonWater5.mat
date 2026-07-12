@@ -151,7 +151,7 @@ Material:
     - _FoamColor: {r: 0.7735849, g: 0.15690638, b: 0.15690638, a: 1}
     - _HologramColor: {r: 1, g: 1, b: 1, a: 1}
     - _MainColor: {r: 1, g: 1, b: 1, a: 0.5}
-    - _OutlineColor: {r: 0.1509434, g: 0.029191881, b: 0.048712105, a: 1}
+    - _OutlineColor: {r: 0.5283019, g: 0.39467415, b: 0, a: 1}
     - _ShallowColor: {r: 0, g: 0.8595505, b: 1, a: 0.725}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
