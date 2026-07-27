@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 8022423874259719854}
   - component: {fileID: 3527466294262159301}
   - component: {fileID: 448647896984184045}
-  - component: {fileID: 3462336001200774916}
   - component: {fileID: 9023486936323886665}
   - component: {fileID: 7001095666793799728}
+  - component: {fileID: 3132340851675959236}
   m_Layer: 3
   m_Name: cadaver salto
   m_TagString: Agarrable
@@ -86,21 +86,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 112
   m_CollisionDetection: 0
---- !u!114 &3462336001200774916
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3947708304889539664}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 44b8aaa4c0392d84282e397d629e050e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  capaSuelo:
-    serializedVersion: 2
-    m_Bits: 8
 --- !u!114 &9023486936323886665
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -108,7 +93,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3947708304889539664}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d44333760c43b647a3c47ab5be2f495, type: 3}
   m_Name: 
@@ -126,11 +111,26 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3947708304889539664}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a874b5922249002478f6189006d8abe8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3132340851675959236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3947708304889539664}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d579e34784a0fdd4ab3fefa7706f1874, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mantenerRotacion: 1
+  alturaMinimaJugador: 0.2
+  tagJugador: Player
 --- !u!1 &3976194000553924862
 GameObject:
   m_ObjectHideFlags: 0
