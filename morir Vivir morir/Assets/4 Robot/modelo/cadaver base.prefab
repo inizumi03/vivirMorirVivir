@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4566444599940854589}
   - component: {fileID: 3547687551452024698}
   - component: {fileID: 6011433074282780556}
+  - component: {fileID: -8117573399080963109}
   m_Layer: 0
   m_Name: cadaver base
   m_TagString: Agarrable
@@ -117,6 +118,19 @@ MonoBehaviour:
   velocidadAcomodo: 5
   bloquearRotacionX: 1
   bloquearRotacionZ: 1
+--- !u!114 &-8117573399080963109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4394913491035519324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b5d3f332601bfa4b925b76169e0e65e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  peso: 1
 --- !u!1001 &4339582563533445108
 PrefabInstance:
   m_ObjectHideFlags: 0
