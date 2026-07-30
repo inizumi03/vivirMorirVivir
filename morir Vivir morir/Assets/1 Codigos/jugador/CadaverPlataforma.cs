@@ -77,10 +77,7 @@ public class CadaverPlataforma : MonoBehaviour
         kinematicOriginal = rb.isKinematic;
         restriccionesOriginales = rb.constraints;
 
-        /*
-         * Solo se pueden modificar las velocidades
-         * antes de convertirlo en kinematic.
-         */
+       
         if (!rb.isKinematic)
         {
             rb.velocity = Vector3.zero;
@@ -210,11 +207,7 @@ public class CadaverPlataforma : MonoBehaviour
 
         foreach (ContactPoint contacto in collision.contacts)
         {
-            /*
-             * La normal se comprueba desde el cadáver.
-             * Una normal hacia abajo significa que el
-             * jugador está apoyado sobre la parte superior.
-             */
+            
             if (contacto.normal.y <= -normalMinima)
             {
                 estaEncima = true;
@@ -251,18 +244,12 @@ public class CadaverPlataforma : MonoBehaviour
                 jugadorEncima.GetComponentInParent<Rigidbody>();
         }
 
-        /*
-         * Si encontramos el Rigidbody en un padre,
-         * usamos ese objeto como jugador principal.
-         */
+       
         if (rbJugador != null)
         {
             jugadorEncima = rbJugador.transform;
 
-            /*
-             * Interpolate ayuda a evitar pequeños tirones
-             * visuales durante el movimiento.
-             */
+           
             rbJugador.interpolation =
                 RigidbodyInterpolation.Interpolate;
         }
@@ -270,11 +257,7 @@ public class CadaverPlataforma : MonoBehaviour
         padreOriginalJugador =
             jugadorEncima.parent;
 
-        /*
-         * El true mantiene la posición global actual.
-         * Desde ahora el jugador acompaña exactamente
-         * el movimiento de la plataforma.
-         */
+        
         jugadorEncima.SetParent(
             transform,
             true
@@ -296,10 +279,7 @@ public class CadaverPlataforma : MonoBehaviour
             jugadorEncima.position -
             transform.position;
 
-        /*
-         * Si el jugador está demasiado lejos,
-         * significa que saltó, cayó o dejó la plataforma.
-         */
+       
         if (diferencia.magnitude >
             distanciaMaximaEncima)
         {
@@ -352,10 +332,7 @@ public class CadaverPlataforma : MonoBehaviour
     {
         if (jugadorEncima != null)
         {
-            /*
-             * Recupera el padre que tenía antes
-             * de subir a la plataforma.
-             */
+            
             jugadorEncima.SetParent(
                 padreOriginalJugador,
                 true
