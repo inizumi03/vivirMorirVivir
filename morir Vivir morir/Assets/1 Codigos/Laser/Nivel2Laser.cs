@@ -8,11 +8,15 @@ public class Nivel2Laser : MonoBehaviour
     public Transform puntoA;
     public Transform puntoB;
 
-    [Header("Movimiento")]
+    [Header("Movimiento individual")]
     public float velocidad = 3f;
 
     [Tooltip("Distancia necesaria para cambiar de dirección.")]
     public float distanciaParaCambiar = 0.03f;
+
+    [Header("Sincronización")]
+    [Tooltip("Si tiene un ManagerLaser asignado, este láser será controlado por él.")]
+    public ManagerLaser managerLaser;
 
     [Header("Ejes bloqueados")]
     public bool bloquearX;
@@ -25,10 +29,30 @@ public class Nivel2Laser : MonoBehaviour
 
     private readonly List<CadaverEnLaser> cadaveres =
         new List<CadaverEnLaser>();
+
     private GameObject cadaverActual;
+
+    private bool usarManager;
+    private float progresoManager;
+
+    private void Start()
+    {
+        if (managerLaser != null)
+        {
+            UsarManager(managerLaser);
+        }
+    }
+
     private void FixedUpdate()
     {
-        MoverCadaveres();
+        if (usarManager)
+        {
+            MoverCadaveresSincronizados();
+        }
+        else
+        {
+            MoverCadaveresIndividualmente();
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -80,67 +104,103 @@ public class Nivel2Laser : MonoBehaviour
     }
 
     private void AgregarCadaver(
-     CadaverPlataforma cadaver)
+        CadaverPlataforma cadaver)
     {
-        // Si ya existe un cadáver controlando este láser,
-        // lo destruimos antes de agregar el nuevo.
         if (cadaverActual != null &&
             cadaverActual != cadaver.gameObject)
         {
+            CadaverPlataforma anterior =
+                cadaverActual.GetComponent<CadaverPlataforma>();
+
+            if (anterior == null)
+            {
+                anterior =
+                    cadaverActual.GetComponentInParent<CadaverPlataforma>();
+            }
+
+            if (anterior != null)
+            {
+                QuitarCadaver(anterior);
+            }
+
             Destroy(cadaverActual);
         }
 
-        // Guardamos el nuevo cadáver como el activo.
         cadaverActual = cadaver.gameObject;
 
         Vector3 posicionActual =
             ObtenerPosicionCadaver(cadaver);
 
-        Vector3 posicionSobreRecorrido =
-            ObtenerPuntoMasCercanoDelSegmento(
-                posicionActual,
-                puntoA.position,
-                puntoB.position
-            );
-
         Vector3 posicionBloqueada =
-            posicionSobreRecorrido;
-
-        Transform objetivoInicial =
-            ObtenerPuntoMasLejano(
-                posicionSobreRecorrido
-            );
+            posicionActual;
 
         CadaverEnLaser nuevoCadaver =
             new CadaverEnLaser();
 
         nuevoCadaver.cadaver = cadaver;
-        nuevoCadaver.objetivoActual = objetivoInicial;
-        nuevoCadaver.posicionBloqueada = posicionBloqueada;
+        nuevoCadaver.posicionBloqueada =
+            posicionBloqueada;
+
+        if (!usarManager)
+        {
+            Vector3 posicionSobreRecorrido =
+                ObtenerPuntoMasCercanoDelSegmento(
+                    posicionActual,
+                    puntoA.position,
+                    puntoB.position
+                );
+
+            nuevoCadaver.objetivoActual =
+                ObtenerPuntoMasLejano(
+                    posicionSobreRecorrido
+                );
+        }
 
         cadaveres.Add(nuevoCadaver);
 
         cadaver.ActivarComoPlataforma();
 
-        Vector3 posicionFinal =
-            AplicarEjesBloqueados(
-                posicionSobreRecorrido,
-                posicionBloqueada
-            );
-
-        Vector3 desplazamiento =
-            posicionFinal - posicionActual;
-
-        cadaver.MoverPlataforma(
-            posicionFinal,
-            desplazamiento
-        );
-    }
-    private void MoverCadaveres()
-    {
-        for (int i = cadaveres.Count - 1; i >= 0; i--)
+        if (usarManager)
         {
-            CadaverEnLaser datos = cadaveres[i];
+            ColocarCadaverEnProgreso(
+                nuevoCadaver,
+                progresoManager
+            );
+        }
+        else
+        {
+            Vector3 posicionSobreRecorrido =
+                ObtenerPuntoMasCercanoDelSegmento(
+                    posicionActual,
+                    puntoA.position,
+                    puntoB.position
+                );
+
+            Vector3 posicionFinal =
+                AplicarEjesBloqueados(
+                    posicionSobreRecorrido,
+                    posicionBloqueada
+                );
+
+            Vector3 desplazamiento =
+                posicionFinal -
+                posicionActual;
+
+            cadaver.MoverPlataforma(
+                posicionFinal,
+                desplazamiento
+            );
+        }
+    }
+
+    private void MoverCadaveresSincronizados()
+    {
+        for (int i = cadaveres.Count - 1;
+             i >= 0;
+             i--)
+        {
+            CadaverEnLaser datos =
+                cadaveres[i];
 
             if (datos == null ||
                 datos.cadaver == null)
@@ -149,11 +209,74 @@ public class Nivel2Laser : MonoBehaviour
                 continue;
             }
 
-            MoverCadaver(datos);
+            ColocarCadaverEnProgreso(
+                datos,
+                progresoManager
+            );
         }
     }
 
-    private void MoverCadaver(
+    private void ColocarCadaverEnProgreso(
+        CadaverEnLaser datos,
+        float progreso)
+    {
+        if (datos == null ||
+            datos.cadaver == null ||
+            puntoA == null ||
+            puntoB == null)
+        {
+            return;
+        }
+
+        Vector3 posicionAnterior =
+            ObtenerPosicionCadaver(
+                datos.cadaver
+            );
+
+        Vector3 posicionNueva =
+            Vector3.Lerp(
+                puntoA.position,
+                puntoB.position,
+                Mathf.Clamp01(progreso)
+            );
+
+        posicionNueva =
+            AplicarEjesBloqueados(
+                posicionNueva,
+                datos.posicionBloqueada
+            );
+
+        Vector3 desplazamiento =
+            posicionNueva -
+            posicionAnterior;
+
+        datos.cadaver.MoverPlataforma(
+            posicionNueva,
+            desplazamiento
+        );
+    }
+
+    private void MoverCadaveresIndividualmente()
+    {
+        for (int i = cadaveres.Count - 1;
+             i >= 0;
+             i--)
+        {
+            CadaverEnLaser datos =
+                cadaveres[i];
+
+            if (datos == null ||
+                datos.cadaver == null)
+            {
+                cadaveres.RemoveAt(i);
+                continue;
+            }
+
+            MoverCadaverIndividual(datos);
+        }
+    }
+
+    private void MoverCadaverIndividual(
         CadaverEnLaser datos)
     {
         if (datos.objetivoActual == null)
@@ -189,11 +312,13 @@ public class Nivel2Laser : MonoBehaviour
             Vector3.MoveTowards(
                 posicionSobreRecorrido,
                 posicionObjetivo,
-                velocidad * Time.fixedDeltaTime
+                velocidad *
+                Time.fixedDeltaTime
             );
 
         Vector3 desplazamiento =
-            nuevaPosicion - posicionAnterior;
+            nuevaPosicion -
+            posicionAnterior;
 
         datos.cadaver.MoverPlataforma(
             nuevaPosicion,
@@ -212,23 +337,40 @@ public class Nivel2Laser : MonoBehaviour
         }
     }
 
+    public void UsarManager(
+        ManagerLaser nuevoManager)
+    {
+        managerLaser = nuevoManager;
+        usarManager = nuevoManager != null;
+    }
+
+    public void ActualizarDesdeManager(
+        float nuevoProgreso)
+    {
+        progresoManager =
+            Mathf.Clamp01(nuevoProgreso);
+    }
+
     private Vector3 AplicarEjesBloqueados(
         Vector3 posicion,
         Vector3 posicionBloqueada)
     {
         if (bloquearX)
         {
-            posicion.x = posicionBloqueada.x;
+            posicion.x =
+                posicionBloqueada.x;
         }
 
         if (bloquearY)
         {
-            posicion.y = posicionBloqueada.y;
+            posicion.y =
+                posicionBloqueada.y;
         }
 
         if (bloquearZ)
         {
-            posicion.z = posicionBloqueada.z;
+            posicion.z =
+                posicionBloqueada.z;
         }
 
         return posicion;
@@ -239,7 +381,8 @@ public class Nivel2Laser : MonoBehaviour
         Vector3 inicio,
         Vector3 final)
     {
-        Vector3 direccion = final - inicio;
+        Vector3 direccion =
+            final - inicio;
 
         float longitudCuadrada =
             direccion.sqrMagnitude;
@@ -255,9 +398,12 @@ public class Nivel2Laser : MonoBehaviour
                 direccion
             ) / longitudCuadrada;
 
-        porcentaje = Mathf.Clamp01(porcentaje);
+        porcentaje =
+            Mathf.Clamp01(porcentaje);
 
-        return inicio + direccion * porcentaje;
+        return inicio +
+               direccion *
+               porcentaje;
     }
 
     private Transform ObtenerPuntoMasLejano(
@@ -331,9 +477,11 @@ public class Nivel2Laser : MonoBehaviour
     }
 
     private void QuitarCadaver(
-    CadaverPlataforma cadaver)
+        CadaverPlataforma cadaver)
     {
-        for (int i = cadaveres.Count - 1; i >= 0; i--)
+        for (int i = cadaveres.Count - 1;
+             i >= 0;
+             i--)
         {
             if (cadaveres[i].cadaver == cadaver)
             {
@@ -341,7 +489,8 @@ public class Nivel2Laser : MonoBehaviour
             }
         }
 
-        if (cadaverActual == cadaver.gameObject)
+        if (cadaverActual ==
+            cadaver.gameObject)
         {
             cadaverActual = null;
         }
@@ -351,8 +500,11 @@ public class Nivel2Laser : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        if (puntoA == null || puntoB == null)
+        if (puntoA == null ||
+            puntoB == null)
+        {
             return;
+        }
 
         Gizmos.color = Color.red;
 
