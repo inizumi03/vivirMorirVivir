@@ -129,8 +129,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mantenerRotacion: 1
-  alturaMinimaJugador: 0.2
   tagJugador: Player
+  normalMinima: 0.45
+  distanciaMaximaEncima: 1.5
 --- !u!1 &3976194000553924862
 GameObject:
   m_ObjectHideFlags: 0
@@ -258,7 +259,7 @@ GameObject:
   - component: {fileID: 5871740375892269343}
   - component: {fileID: 1616231310322416598}
   - component: {fileID: 8290754477539224154}
-  - component: {fileID: 5621691727124184751}
+  - component: {fileID: 1916616834031394725}
   m_Layer: 13
   m_Name: plataforma
   m_TagString: Untagged
@@ -331,7 +332,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &5621691727124184751
+--- !u!65 &1916616834031394725
 BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -350,8 +351,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.022420008, y: 0.022182677, z: 0.08249522}
-  m_Center: {x: -0.0000040910772, y: 0.00019882209, z: -0.0271102}
+  m_Size: {x: 0.019999998, y: 0.019999998, z: 0.029160567}
+  m_Center: {x: 3.9335124e-19, y: -0.000000029802322, z: -0.0004429337}
 --- !u!1001 &3016607073032274464
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -615,7 +616,7 @@ PrefabInstance:
     - target: {fileID: -2473749268392600639, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_Materials.Array.data[0]
       value: 
-      objectReference: {fileID: 2100000, guid: c5cc8936ae7c57e4c85314db039d5eaf, type: 2}
+      objectReference: {fileID: 2100000, guid: db65699236b55b345b5b361b9a210da5, type: 2}
     - target: {fileID: -2414167776612271763, guid: 77916020e60eb2b4ab6bdbadd97179e2, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: 66.33946

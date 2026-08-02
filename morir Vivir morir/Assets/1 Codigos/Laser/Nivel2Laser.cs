@@ -30,7 +30,7 @@ public class Nivel2Laser : MonoBehaviour
     private readonly List<CadaverEnLaser> cadaveres =
         new List<CadaverEnLaser>();
 
-    private GameObject cadaverActual;
+    private CadaverPlataforma cadaverActual;
 
     private bool usarManager;
     private float progresoManager;
@@ -45,6 +45,8 @@ public class Nivel2Laser : MonoBehaviour
 
     private void FixedUpdate()
     {
+        LimpiarCadaveresDestruidos();
+
         if (usarManager)
         {
             MoverCadaveresSincronizados();
@@ -76,6 +78,9 @@ public class Nivel2Laser : MonoBehaviour
         if (cadaver == null)
             return;
 
+        if (cadaver != cadaverActual)
+            return;
+
         QuitarCadaver(cadaver);
     }
 
@@ -85,6 +90,9 @@ public class Nivel2Laser : MonoBehaviour
             other.GetComponentInParent<CadaverPlataforma>();
 
         if (cadaver == null)
+            return;
+
+        if (!cadaver.gameObject.activeInHierarchy)
             return;
 
         if (puntoA == null || puntoB == null)
@@ -97,48 +105,39 @@ public class Nivel2Laser : MonoBehaviour
             return;
         }
 
-        if (BuscarCadaver(cadaver) != null)
+        if (cadaver == cadaverActual)
             return;
 
         AgregarCadaver(cadaver);
     }
 
     private void AgregarCadaver(
-        CadaverPlataforma cadaver)
+        CadaverPlataforma nuevoCadaver)
     {
+        if (nuevoCadaver == null)
+            return;
+
         if (cadaverActual != null &&
-            cadaverActual != cadaver.gameObject)
+            cadaverActual != nuevoCadaver)
         {
-            CadaverPlataforma anterior =
-                cadaverActual.GetComponent<CadaverPlataforma>();
-
-            if (anterior == null)
-            {
-                anterior =
-                    cadaverActual.GetComponentInParent<CadaverPlataforma>();
-            }
-
-            if (anterior != null)
-            {
-                QuitarCadaver(anterior);
-            }
-
-            Destroy(cadaverActual);
+            ReemplazarCadaverActual();
         }
 
-        cadaverActual = cadaver.gameObject;
+        cadaverActual = nuevoCadaver;
 
         Vector3 posicionActual =
-            ObtenerPosicionCadaver(cadaver);
+            ObtenerPosicionCadaver(nuevoCadaver);
 
         Vector3 posicionBloqueada =
             posicionActual;
 
-        CadaverEnLaser nuevoCadaver =
+        CadaverEnLaser nuevosDatos =
             new CadaverEnLaser();
 
-        nuevoCadaver.cadaver = cadaver;
-        nuevoCadaver.posicionBloqueada =
+        nuevosDatos.cadaver =
+            nuevoCadaver;
+
+        nuevosDatos.posicionBloqueada =
             posicionBloqueada;
 
         if (!usarManager)
@@ -150,20 +149,21 @@ public class Nivel2Laser : MonoBehaviour
                     puntoB.position
                 );
 
-            nuevoCadaver.objetivoActual =
+            nuevosDatos.objetivoActual =
                 ObtenerPuntoMasLejano(
                     posicionSobreRecorrido
                 );
         }
 
-        cadaveres.Add(nuevoCadaver);
+        cadaveres.Clear();
+        cadaveres.Add(nuevosDatos);
 
-        cadaver.ActivarComoPlataforma();
+        nuevoCadaver.ActivarComoPlataforma();
 
         if (usarManager)
         {
             ColocarCadaverEnProgreso(
-                nuevoCadaver,
+                nuevosDatos,
                 progresoManager
             );
         }
@@ -183,14 +183,37 @@ public class Nivel2Laser : MonoBehaviour
                 );
 
             Vector3 desplazamiento =
-                posicionFinal -
-                posicionActual;
+                posicionFinal - posicionActual;
 
-            cadaver.MoverPlataforma(
+            nuevoCadaver.MoverPlataforma(
                 posicionFinal,
                 desplazamiento
             );
         }
+    }
+
+    private void ReemplazarCadaverActual()
+    {
+        if (cadaverActual == null)
+        {
+            cadaveres.Clear();
+            return;
+        }
+
+        CadaverPlataforma anterior =
+            cadaverActual;
+
+        cadaverActual = null;
+        cadaveres.Clear();
+
+        anterior.DesactivarComoPlataforma();
+
+        GameObject objetoAnterior =
+            anterior.gameObject;
+
+        objetoAnterior.SetActive(false);
+
+        Destroy(objetoAnterior);
     }
 
     private void MoverCadaveresSincronizados()
@@ -312,8 +335,7 @@ public class Nivel2Laser : MonoBehaviour
             Vector3.MoveTowards(
                 posicionSobreRecorrido,
                 posicionObjetivo,
-                velocidad *
-                Time.fixedDeltaTime
+                velocidad * Time.fixedDeltaTime
             );
 
         Vector3 desplazamiento =
@@ -402,8 +424,7 @@ public class Nivel2Laser : MonoBehaviour
             Mathf.Clamp01(porcentaje);
 
         return inicio +
-               direccion *
-               porcentaje;
+               direccion * porcentaje;
     }
 
     private Transform ObtenerPuntoMasLejano(
@@ -462,40 +483,61 @@ public class Nivel2Laser : MonoBehaviour
         return cadaver.transform.position;
     }
 
-    private CadaverEnLaser BuscarCadaver(
-        CadaverPlataforma cadaver)
-    {
-        foreach (CadaverEnLaser datos in cadaveres)
-        {
-            if (datos.cadaver == cadaver)
-            {
-                return datos;
-            }
-        }
-
-        return null;
-    }
-
     private void QuitarCadaver(
         CadaverPlataforma cadaver)
     {
+        if (cadaver == null)
+            return;
+
         for (int i = cadaveres.Count - 1;
              i >= 0;
              i--)
         {
-            if (cadaveres[i].cadaver == cadaver)
+            if (cadaveres[i] == null ||
+                cadaveres[i].cadaver == cadaver)
             {
                 cadaveres.RemoveAt(i);
             }
         }
 
-        if (cadaverActual ==
-            cadaver.gameObject)
+        if (cadaverActual == cadaver)
         {
             cadaverActual = null;
         }
 
         cadaver.DesactivarComoPlataforma();
+    }
+
+    private void LimpiarCadaveresDestruidos()
+    {
+        for (int i = cadaveres.Count - 1;
+             i >= 0;
+             i--)
+        {
+            if (cadaveres[i] == null ||
+                cadaveres[i].cadaver == null)
+            {
+                cadaveres.RemoveAt(i);
+            }
+        }
+
+        if (cadaverActual == null &&
+            cadaveres.Count > 0)
+        {
+            cadaverActual =
+                cadaveres[0].cadaver;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (cadaverActual != null)
+        {
+            cadaverActual.DesactivarComoPlataforma();
+        }
+
+        cadaverActual = null;
+        cadaveres.Clear();
     }
 
     private void OnDrawGizmos()
