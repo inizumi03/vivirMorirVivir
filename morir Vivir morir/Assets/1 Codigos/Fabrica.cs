@@ -1,7 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Fabrica : MonoBehaviour
 {
@@ -24,25 +23,22 @@ public class Fabrica : MonoBehaviour
     [Header("Daño")]
     public string tagDaño = "Daño";
 
-    [Header("Energía")]
-    public float energiaMaxima = 100f;
-    public float energiaActual = 100f;
-    public float energiaPerdidaPorRespawn = 25f;
-    public Image barraEnergia;
+    [Header("Dinero")]
+    public int dineroInicial = 100;
+    public int dineroActual = 100;
+    public int dineroPerdidoPorMuerte = 10;
+    public TextMeshProUGUI textoDinero;
 
     [Header("Cambio de forma")]
     public CambioForma cambioForma;
 
-    [Header("Derrota")]
-    public GameObject canvasDerrota;
-
+ 
     private Vector3 ultimaPosicionSegura;
     private Quaternion ultimaRotacionSegura;
 
     private bool siendoTransportada = false;
     private Rigidbody rb;
 
-    // Cada forma guarda sus propios clones.
     private Queue<GameObject> clonesBase =
         new Queue<GameObject>();
 
@@ -58,13 +54,10 @@ public class Fabrica : MonoBehaviour
 
         GuardarPosicionSegura();
 
-        energiaActual = energiaMaxima;
-        ActualizarBarraEnergia();
+        dineroActual = dineroInicial;
+        ActualizarTextoDinero();
 
-        if (canvasDerrota != null)
-        {
-            canvasDerrota.SetActive(false);
-        }
+       
     }
 
     public void GuardarPosicionSegura()
@@ -90,12 +83,12 @@ public class Fabrica : MonoBehaviour
 
     public void RespawnearJugador(GameObject jugador)
     {
-        // Crea el cuerpo usando la forma con la que murió.
         CrearCuerpo(jugador);
 
-        PerderEnergia();
+        PerderDinero();
 
-        Rigidbody rbJugador = jugador.GetComponent<Rigidbody>();
+        Rigidbody rbJugador =
+            jugador.GetComponent<Rigidbody>();
 
         if (rbJugador != null)
         {
@@ -176,7 +169,8 @@ public class Fabrica : MonoBehaviour
 
         if (cambio != null)
         {
-            formaAlMorir = cambio.ObtenerFormaActual();
+            formaAlMorir =
+                cambio.ObtenerFormaActual();
         }
 
         GameObject prefabElegido =
@@ -185,8 +179,6 @@ public class Fabrica : MonoBehaviour
         int limite =
             ObtenerLimiteSegunForma(formaAlMorir);
 
-        // Por ejemplo, la forma base tiene límite 0,
-        // así que no genera ningún clon.
         if (prefabElegido == null || limite <= 0)
         {
             return;
@@ -368,65 +360,31 @@ public class Fabrica : MonoBehaviour
         }
     }
 
-    private void PerderEnergia()
+    private void PerderDinero()
     {
-        energiaActual -= energiaPerdidaPorRespawn;
+        dineroActual -= dineroPerdidoPorMuerte;
 
-        energiaActual = Mathf.Clamp(
-            energiaActual,
-            0f,
-            energiaMaxima
-        );
+        ActualizarTextoDinero();
+    }
 
-        ActualizarBarraEnergia();
-
-        if (energiaActual <= 0f)
+    private void ActualizarTextoDinero()
+    {
+        if (textoDinero != null)
         {
-            ActivarDerrota();
+            textoDinero.text =
+                "$" + dineroActual;
         }
     }
 
-    private void ActualizarBarraEnergia()
+    public void AgregarDinero(int cantidad)
     {
-        if (barraEnergia != null)
-        {
-            barraEnergia.fillAmount =
-                energiaActual / energiaMaxima;
-        }
+        dineroActual += cantidad;
+
+        ActualizarTextoDinero();
     }
 
-    private void ActivarDerrota()
+    public int ObtenerDineroActual()
     {
-        if (canvasDerrota != null)
-        {
-            canvasDerrota.SetActive(true);
-        }
-
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-
-        Time.timeScale = 0f;
-    }
-
-    public float CargarEnergia(float cantidad)
-    {
-        if (energiaActual >= energiaMaxima)
-        {
-            return 0f;
-        }
-
-        float energiaAntes = energiaActual;
-
-        energiaActual += cantidad;
-
-        energiaActual = Mathf.Clamp(
-            energiaActual,
-            0f,
-            energiaMaxima
-        );
-
-        ActualizarBarraEnergia();
-
-        return energiaActual - energiaAntes;
+        return dineroActual;
     }
 }

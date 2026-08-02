@@ -4,15 +4,33 @@ using UnityEngine;
 
 public class PuntoControlInvisible : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [Header("Fábrica")]
+    public Fabrica fabrica;
 
-    // Update is called once per frame
-    void Update()
+    [Header("Dinero")]
+    public bool darDinero = true;
+    public int cantidadDinero = 100;
+    public bool soloUnaVez = true;
+
+    private bool usado = false;
+
+    private void OnTriggerEnter(Collider other)
     {
-        
+        if (!other.CompareTag("Player"))
+            return;
+
+        if (fabrica != null)
+        {
+            fabrica.ActualizarPuntoControl(transform);
+
+            if (darDinero)
+            {
+                if (!soloUnaVez || !usado)
+                {
+                    fabrica.AgregarDinero(cantidadDinero);
+                    usado = true;
+                }
+            }
+        }
     }
 }
