@@ -20,6 +20,9 @@ public class Fabrica : MonoBehaviour
     public int maxClonesSalto = 5;
     public int maxClonesMetal = 2;
 
+    [Header("Interfaz de clones")]
+    public TextMeshProUGUI textoClones;
+
     [Header("Daño")]
     public string tagDaño = "Daño";
 
@@ -32,7 +35,6 @@ public class Fabrica : MonoBehaviour
     [Header("Cambio de forma")]
     public CambioForma cambioForma;
 
- 
     private Vector3 ultimaPosicionSegura;
     private Quaternion ultimaRotacionSegura;
 
@@ -48,6 +50,10 @@ public class Fabrica : MonoBehaviour
     private Queue<GameObject> clonesMetal =
         new Queue<GameObject>();
 
+    private int ultimaFormaMostrada = -1;
+    private int ultimaCantidadMostrada = -1;
+    private int ultimoLimiteMostrado = -1;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -55,9 +61,14 @@ public class Fabrica : MonoBehaviour
         GuardarPosicionSegura();
 
         dineroActual = dineroInicial;
-        ActualizarTextoDinero();
 
-       
+        ActualizarTextoDinero();
+        ActualizarTextoClones(true);
+    }
+
+    private void Update()
+    {
+        ActualizarTextoClones(false);
     }
 
     public void GuardarPosicionSegura()
@@ -128,6 +139,7 @@ public class Fabrica : MonoBehaviour
             siendoTransportada = false;
 
             AplicarCambioForma(jugador);
+            ActualizarTextoClones(true);
 
             return;
         }
@@ -158,6 +170,7 @@ public class Fabrica : MonoBehaviour
         }
 
         AplicarCambioForma(jugador);
+        ActualizarTextoClones(true);
     }
 
     private void CrearCuerpo(GameObject jugador)
@@ -181,6 +194,7 @@ public class Fabrica : MonoBehaviour
 
         if (prefabElegido == null || limite <= 0)
         {
+            ActualizarTextoClones(true);
             return;
         }
 
@@ -203,6 +217,8 @@ public class Fabrica : MonoBehaviour
             formaAlMorir,
             limite
         );
+
+        ActualizarTextoClones(true);
     }
 
     private GameObject ObtenerPrefabSegunForma(int forma)
@@ -273,6 +289,8 @@ public class Fabrica : MonoBehaviour
                 Destroy(clonMasViejo);
             }
         }
+
+        ActualizarTextoClones(true);
     }
 
     private Queue<GameObject> ObtenerColaSegunForma(int forma)
@@ -298,6 +316,9 @@ public class Fabrica : MonoBehaviour
     private void LimpiarReferenciasDestruidas(
         Queue<GameObject> cola)
     {
+        if (cola == null)
+            return;
+
         int cantidad = cola.Count;
 
         for (int i = 0; i < cantidad; i++)
@@ -376,6 +397,64 @@ public class Fabrica : MonoBehaviour
         }
     }
 
+    private void ActualizarTextoClones(
+        bool forzarActualizacion)
+    {
+        if (textoClones == null)
+            return;
+
+        int formaActual = 0;
+
+        if (cambioForma != null)
+        {
+            formaActual =
+                cambioForma.ObtenerFormaActual();
+        }
+
+        Queue<GameObject> colaActual =
+            ObtenerColaSegunForma(formaActual);
+
+        if (colaActual != null)
+        {
+            LimpiarReferenciasDestruidas(
+                colaActual
+            );
+        }
+
+        int cantidadActual =
+            colaActual != null
+                ? colaActual.Count
+                : 0;
+
+        int limiteActual =
+            ObtenerLimiteSegunForma(
+                formaActual
+            );
+
+        if (!forzarActualizacion &&
+            formaActual == ultimaFormaMostrada &&
+            cantidadActual == ultimaCantidadMostrada &&
+            limiteActual == ultimoLimiteMostrado)
+        {
+            return;
+        }
+
+        textoClones.text =
+            "OBVIS DISPONIBLES:\n" +
+            cantidadActual +
+            " / " +
+            limiteActual;
+
+        ultimaFormaMostrada =
+            formaActual;
+
+        ultimaCantidadMostrada =
+            cantidadActual;
+
+        ultimoLimiteMostrado =
+            limiteActual;
+    }
+
     public void AgregarDinero(int cantidad)
     {
         dineroActual += cantidad;
@@ -386,5 +465,28 @@ public class Fabrica : MonoBehaviour
     public int ObtenerDineroActual()
     {
         return dineroActual;
+    }
+
+    public int ObtenerCantidadClonesFormaActual()
+    {
+        int formaActual = 0;
+
+        if (cambioForma != null)
+        {
+            formaActual =
+                cambioForma.ObtenerFormaActual();
+        }
+
+        Queue<GameObject> colaActual =
+            ObtenerColaSegunForma(formaActual);
+
+        if (colaActual == null)
+            return 0;
+
+        LimpiarReferenciasDestruidas(
+            colaActual
+        );
+
+        return colaActual.Count;
     }
 }

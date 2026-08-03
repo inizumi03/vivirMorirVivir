@@ -10,6 +10,10 @@ public class MuerteTrucha : MonoBehaviour
     [Header("Velocidad")]
     public float velocidadFade = 2f;
 
+    [Header("Tiempo de respawn")]
+    public float tiempoAntesDelRespawn = 0.5f;
+    public float tiempoDespuesDelRespawn = 0.1f;
+
     public bool ocupado = false;
 
     private void Start()
@@ -20,30 +24,53 @@ public class MuerteTrucha : MonoBehaviour
         }
     }
 
-    public IEnumerator FadeRespawn(System.Action accionRespawn)
+    public IEnumerator FadeRespawn(
+        System.Action accionRespawn)
     {
-        if (ocupado) yield break;
+        if (ocupado)
+            yield break;
 
         ocupado = true;
 
-        // FADE A NEGRO
+        if (canvasGroup == null)
+        {
+            yield return new WaitForSecondsRealtime(
+                tiempoAntesDelRespawn
+            );
+
+            accionRespawn?.Invoke();
+
+            ocupado = false;
+            yield break;
+        }
+
         while (canvasGroup.alpha < 1f)
         {
-            canvasGroup.alpha += Time.deltaTime * velocidadFade;
+            canvasGroup.alpha +=
+                Time.unscaledDeltaTime *
+                velocidadFade;
+
             yield return null;
         }
 
         canvasGroup.alpha = 1f;
 
-        // RESPAWN
+        yield return new WaitForSecondsRealtime(
+            tiempoAntesDelRespawn
+        );
+
         accionRespawn?.Invoke();
 
-        yield return new WaitForSeconds(0.1f);
+        yield return new WaitForSecondsRealtime(
+            tiempoDespuesDelRespawn
+        );
 
-        // SACAR NEGRO
         while (canvasGroup.alpha > 0f)
         {
-            canvasGroup.alpha -= Time.deltaTime * velocidadFade;
+            canvasGroup.alpha -=
+                Time.unscaledDeltaTime *
+                velocidadFade;
+
             yield return null;
         }
 
