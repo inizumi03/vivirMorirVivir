@@ -15,6 +15,8 @@ public class AgarraYLanzar : MonoBehaviour
     public float fuerzaMaxima = 18f;
     public float velocidadCarga = 12f;
     public float fuerzaArriba = 2f;
+    public float tiempoParaSoltar = 0.2f;
+    public float separacionObstaculo = 0.05f;
 
     [Header("Trayectoria")]
     public LineRenderer lineaTrayectoria;
@@ -270,43 +272,83 @@ public class AgarraYLanzar : MonoBehaviour
 
     private void Soltar()
     {
-        if (objetoAgarrado == null || rbObjeto == null) return;
+        if (objetoAgarrado == null || rbObjeto == null)
+            return;
 
-        ObjetoEstable datos = objetoAgarrado.GetComponent<ObjetoEstable>();
+        GameObject objeto = objetoAgarrado;
+        Rigidbody rb = rbObjeto;
 
-        if (datos != null)
-            datos.IgnorarColisionConJugador(collidersJugador, false);
+        ObjetoEstable datos =
+            objeto.GetComponent<ObjetoEstable>();
 
-        if (puntoSoltar != null)
+        Vector3 posicionDestino =
+            puntoSoltar != null
+                ? puntoSoltar.position
+                : objeto.transform.position;
+
+        Quaternion rotacionDestino =
+            puntoSoltar != null
+                ? puntoSoltar.rotation
+                : objeto.transform.rotation;
+
+        Vector3 origen = rb.position;
+        Vector3 direccion = posicionDestino - origen;
+        float distancia = direccion.magnitude;
+
+        if (distancia > 0.001f)
         {
-            objetoAgarrado.transform.position = puntoSoltar.position;
-            objetoAgarrado.transform.rotation = puntoSoltar.rotation;
-        }
+            direccion.Normalize();
 
-        rbObjeto.useGravity = true;
-        rbObjeto.freezeRotation = false;
-        rbObjeto.velocity = Vector3.zero;
-        rbObjeto.angularVelocity = Vector3.zero;
+            RaycastHit[] impactos =
+                rb.SweepTestAll(
+                    direccion,
+                    distancia,
+                    QueryTriggerInteraction.Ignore
+                );
 
-        Fabrica fabrica = objetoAgarrado.GetComponent<Fabrica>();
+            float distanciaPermitida = distancia;
 
-        if (fabrica == null)
-            fabrica = objetoAgarrado.GetComponentInParent<Fabrica>();
+            foreach (RaycastHit impacto in impactos)
+            {
+                if (impacto.collider == null)
+                    continue;
 
-        if (fabrica == null)
-            fabrica = objetoAgarrado.GetComponentInChildren<Fabrica>();
+                if (impacto.collider.transform.IsChildOf(
+                    objeto.transform))
+                {
+                    continue;
+                }
 
-        if (fabrica != null)
-        {
-            fabrica.MarcarTransportada(false);
-            Debug.Log("FABRICA SOLTADA");
-        }
+                bool perteneceAlJugador = false;
 
-        QuedarQuieto quieto = objetoAgarrado.GetComponentInParent<QuedarQuieto>();
+                foreach (Collider colliderJugador
+                         in collidersJugador)
+                {
+                    if (colliderJugador ==
+                        impacto.collider)
+                    {
+                        perteneceAlJugador = true;
+                        break;
+                    }
+                }
 
-        if (quieto != null)
-        {
-            quieto.Congelar();
+                if (perteneceAlJugador)
+                    continue;
+
+                distanciaPermitida = Mathf.Min(
+                    distanciaPermitida,
+                    Mathf.Max(
+                        0f,
+                        impacto.distance -
+                        separacionObstaculo
+                    )
+                );
+            }
+
+            posicionDestino =
+                origen +
+                direccion *
+                distanciaPermitida;
         }
 
         objetoAgarrado = null;
@@ -316,7 +358,19 @@ public class AgarraYLanzar : MonoBehaviour
         fuerzaActual = fuerzaMinima;
 
         if (lineaTrayectoria != null)
+        {
             lineaTrayectoria.enabled = false;
+        }
+
+        StartCoroutine(
+            MoverObjetoAlSoltar(
+                objeto,
+                rb,
+                datos,
+                posicionDestino,
+                rotacionDestino
+            )
+        );
     }
 
     private void Lanzar()
@@ -399,5 +453,106 @@ public class AgarraYLanzar : MonoBehaviour
     {
         return cambioForma != null &&
                cambioForma.EstaEnFormaBase();
+    }
+    private IEnumerator MoverObjetoAlSoltar(
+    GameObject objeto,
+    Rigidbody rb,
+    ObjetoEstable datos,
+    Vector3 posicionDestino,
+    Quaternion rotacionDestino)
+    {
+        if (objeto == null || rb == null)
+            yield break;
+
+        Vector3 posicionInicial = rb.position;
+        Quaternion rotacionInicial = rb.rotation;
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.useGravity = false;
+        rb.freezeRotation = true;
+
+        float tiempo = 0f;
+        float duracion =
+            Mathf.Max(0.01f, tiempoParaSoltar);
+
+        while (tiempo < duracion)
+        {
+            if (objeto == null || rb == null)
+                yield break;
+
+            tiempo += Time.fixedDeltaTime;
+
+            float porcentaje =
+                Mathf.Clamp01(tiempo / duracion);
+
+            porcentaje =
+                porcentaje *
+                porcentaje *
+                (3f - 2f * porcentaje);
+
+            Vector3 nuevaPosicion =
+                Vector3.Lerp(
+                    posicionInicial,
+                    posicionDestino,
+                    porcentaje
+                );
+
+            Quaternion nuevaRotacion =
+                Quaternion.Slerp(
+                    rotacionInicial,
+                    rotacionDestino,
+                    porcentaje
+                );
+
+            rb.MovePosition(nuevaPosicion);
+            rb.MoveRotation(nuevaRotacion);
+
+            yield return new WaitForFixedUpdate();
+        }
+
+        rb.position = posicionDestino;
+        rb.rotation = rotacionDestino;
+
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.useGravity = true;
+        rb.freezeRotation = false;
+
+        if (datos != null)
+        {
+            datos.IgnorarColisionConJugador(
+                collidersJugador,
+                false
+            );
+        }
+
+        Fabrica fabrica =
+            objeto.GetComponent<Fabrica>();
+
+        if (fabrica == null)
+        {
+            fabrica =
+                objeto.GetComponentInParent<Fabrica>();
+        }
+
+        if (fabrica == null)
+        {
+            fabrica =
+                objeto.GetComponentInChildren<Fabrica>();
+        }
+
+        if (fabrica != null)
+        {
+            fabrica.MarcarTransportada(false);
+        }
+
+        QuedarQuieto quieto =
+            objeto.GetComponentInParent<QuedarQuieto>();
+
+        if (quieto != null)
+        {
+            quieto.Congelar();
+        }
     }
 }
