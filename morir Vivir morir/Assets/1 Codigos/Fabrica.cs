@@ -94,6 +94,16 @@ public class Fabrica : MonoBehaviour
 
     public void RespawnearJugador(GameObject jugador)
     {
+        CadaverPlataforma plataforma =
+        jugador.GetComponentInParent<CadaverPlataforma>();
+
+        if (plataforma != null)
+        {
+            plataforma.ForzarSoltarJugador();
+        }
+
+        jugador.transform.SetParent(null, true);
+
         CrearCuerpo(jugador);
 
         PerderDinero();
@@ -109,32 +119,44 @@ public class Fabrica : MonoBehaviour
 
         if (siendoTransportada)
         {
+            Vector3 posicionDestino;
+            Quaternion rotacionDestino;
+
             if (puntoControlActual != null)
             {
+                posicionDestino = puntoControlActual.position;
+                rotacionDestino = puntoControlActual.rotation;
+
                 MoverFabrica(
                     puntoControlActual.position,
                     puntoControlActual.rotation
                 );
-
-                jugador.transform.position =
-                    puntoControlActual.position;
-
-                jugador.transform.rotation =
-                    puntoControlActual.rotation;
             }
             else
             {
+                posicionDestino = ultimaPosicionSegura;
+                rotacionDestino = ultimaRotacionSegura;
+
                 MoverFabrica(
                     ultimaPosicionSegura,
                     ultimaRotacionSegura
                 );
-
-                jugador.transform.position =
-                    ultimaPosicionSegura;
-
-                jugador.transform.rotation =
-                    ultimaRotacionSegura;
             }
+
+            if (rbJugador != null)
+            {
+                rbJugador.position = posicionDestino;
+                rbJugador.rotation = rotacionDestino;
+                rbJugador.velocity = Vector3.zero;
+                rbJugador.angularVelocity = Vector3.zero;
+            }
+            else
+            {
+                jugador.transform.position = posicionDestino;
+                jugador.transform.rotation = rotacionDestino;
+            }
+
+            Physics.SyncTransforms();
 
             siendoTransportada = false;
 
@@ -144,22 +166,34 @@ public class Fabrica : MonoBehaviour
             return;
         }
 
+        Vector3 posicionRespawn;
+        Quaternion rotacionRespawn;
+
         if (puntoRespawnJugador != null)
         {
-            jugador.transform.position =
-                puntoRespawnJugador.position;
-
-            jugador.transform.rotation =
-                puntoRespawnJugador.rotation;
+            posicionRespawn = puntoRespawnJugador.position;
+            rotacionRespawn = puntoRespawnJugador.rotation;
         }
         else
         {
-            jugador.transform.position =
-                transform.position;
-
-            jugador.transform.rotation =
-                transform.rotation;
+            posicionRespawn = transform.position;
+            rotacionRespawn = transform.rotation;
         }
+
+        if (rbJugador != null)
+        {
+            rbJugador.position = posicionRespawn;
+            rbJugador.rotation = rotacionRespawn;
+            rbJugador.velocity = Vector3.zero;
+            rbJugador.angularVelocity = Vector3.zero;
+        }
+        else
+        {
+            jugador.transform.position = posicionRespawn;
+            jugador.transform.rotation = rotacionRespawn;
+        }
+
+        Physics.SyncTransforms();
 
         movJugador movimiento =
             jugador.GetComponent<movJugador>();
@@ -488,5 +522,21 @@ public class Fabrica : MonoBehaviour
         );
 
         return colaActual.Count;
+    }
+    private void SoltarJugadorDePlataforma(GameObject jugador)
+    {
+        if (jugador == null)
+            return;
+
+        jugador.transform.SetParent(null, true);
+
+        Rigidbody rbJugador =
+            jugador.GetComponent<Rigidbody>();
+
+        if (rbJugador != null)
+        {
+            rbJugador.velocity = Vector3.zero;
+            rbJugador.angularVelocity = Vector3.zero;
+        }
     }
 }
