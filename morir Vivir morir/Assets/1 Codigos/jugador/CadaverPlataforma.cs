@@ -360,4 +360,8 @@ public class CadaverPlataforma : MonoBehaviour
     {
         SoltarJugador();
     }
+    public void ForzarSoltarJugador()
+    {
+        SoltarJugador();
+    }
 }
