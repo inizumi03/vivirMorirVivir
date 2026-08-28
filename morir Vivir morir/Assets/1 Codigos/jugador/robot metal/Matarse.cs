@@ -13,15 +13,15 @@ public class Matarse : MonoBehaviour
 
     private void Update()
     {
-        if (!Input.GetKeyDown(KeyCode.E))
-            return;
+        
 
-        if (cambioForma == null || vida == null)
-            return;
+        //if (cambioForma == null || vida == null)
+        //    return;
 
-        if (cambioForma.ObtenerFormaActual() != formaPermitida)
-            return;
+        //if (cambioForma.ObtenerFormaActual() != formaPermitida)
+        //    return;
 
-        vida.Morir();
+        if (Input.GetKeyDown(KeyCode.E) && cambioForma.ObtenerFormaActual() == formaPermitida)
+            vida.Morir();
     }
 }
